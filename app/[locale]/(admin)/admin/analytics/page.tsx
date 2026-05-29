@@ -1,8 +1,8 @@
 import { getAnalyticsData } from "@/actions/admin";
 import { EyebrowLabel } from "@/components/primitives/EyebrowLabel";
 import { formatPrice, formatNumber } from "@/lib/utils";
-import { TrendingUp, Users, ShoppingBag, BookOpen, Download } from "lucide-react";
-import Link from "next/link";
+import { TrendingUp, Users, ShoppingBag, BookOpen } from "lucide-react";
+import { ExportControls } from "./ExportControls";
 
 export const dynamic = "force-dynamic";
 
@@ -29,18 +29,7 @@ export default async function AdminAnalyticsPage({
             Revenue & Growth
           </h1>
         </div>
-        <div className="flex items-center gap-2">
-          {(["enrollments", "orders", "progress"] as const).map((type) => (
-            <Link
-              key={type}
-              href={`/api/analytics/export?type=${type}`}
-              className="flex items-center gap-1.5 px-3 py-1.5 border border-line rounded-r2 text-[12px] text-ink-2 hover:border-viridian hover:text-viridian transition-colors bg-paper"
-            >
-              <Download size={12} />
-              {type === "enrollments" ? "Enrollments" : type === "orders" ? "Orders" : "Progress"} CSV
-            </Link>
-          ))}
-        </div>
+        <ExportControls />
       </div>
 
       {/* KPI Cards */}

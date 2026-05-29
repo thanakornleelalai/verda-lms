@@ -2,7 +2,7 @@
 
 > **Platform:** Online Course Marketplace (Thai / English)
 > **Stack:** Next.js 15 · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Vercel
-> **Last updated:** 2026-05-30 (Session 17 — TASKS.md sync: 14 tasks retroactively ✅ · app icons · CSV export · StreakBadge)
+> **Last updated:** 2026-05-30 (Session 18 — Company CMS (Phase 19) + Mux webhook + analytics date-range export · cert/payment tasks retro-marked)
 > **Version:** 1.0.0
 
 ---
@@ -194,7 +194,7 @@ Phase 15 — Core Student Journey        █████████████
 | **submitReview server action** (DB rolling-avg + mock fallback) | `actions/review.ts` | ✅ (2026-05-17) |
 | **Review → Certificate redirect** | `actions/review.ts` | ✅ (2026-05-17) |
 | KV server-side timer | `api/quiz/timer` | ⏳ ต้องการ Vercel KV |
-| Auto certificate issuance (DB) | `actions/review.ts` (stub) | ⏳ ต้องการ DB |
+| Auto certificate issuance (DB) | `actions/certificate.ts` | ✅ ทำแล้ว (issueCertificate + maybeCertifyOnQuizPass) |
 
 ### Module 5 — Track Progress ✅ COMPLETE (Redesigned 2026-05-17)
 
@@ -742,7 +742,7 @@ RESEND_API_KEY=re_...
 | 2.1.5 | Tiptap rich-text editor for course description | ⏳ | 🟡 Medium | `'use client'` component |
 | 2.1.6 | dnd-kit drag-and-drop lesson reorder | ✅ | `reorderLessons()` Server Action in `actions/studio.ts` (UI pending) |
 | 2.1.7 | Video upload → Vercel Blob presigned URL | ⏳ | 🔴 High | Client uploads directly, bypasses Next.js body limit |
-| 2.1.8 | Mux ingest webhook handler (`POST /api/webhooks/mux`) | ⏳ | 🔴 High | Updates `muxPlaybackId` on Lesson |
+| 2.1.8 | Mux ingest webhook handler (`POST /api/webhooks/mux`) — DB update + mock fallback | ✅ | 🔴 High | Updates `muxPlaybackId` on Lesson |
 | 2.1.9 | Drip scheduling — `availableAt` date picker per lesson | ✅ | `updateLesson()` Server Action supports `drip` field |
 | 2.1.10 | Publish toggle with optimistic UI + ISR revalidation | ✅ | `publishCourse()` + `unpublishCourse()` Server Actions in `actions/studio.ts` |
 | 2.1.11 | Course preview as student | ✅ | 🟡 Medium | "Preview" button with ExternalLink icon in studio courses list → opens `/${locale}/courses/[slug]` in new tab |
@@ -884,7 +884,7 @@ RESEND_API_KEY=re_...
 | 8.3 | Completion percent calculation — `UserCourseProgress.progressPct` | ✅ | 🔴 High | Update on each `LESSON_COMPLETE` event |
 | 8.4 | Student dashboard progress charts (weekly bar chart) | ✅ | 🟡 Medium | Client component, lazy loaded |
 | 8.5 | Instructor analytics page `/studio/analytics` | ✅ | 🟡 Medium | SSR dynamic, complex aggregation query |
-| 8.6 | Date range picker for analytics | ⏳ | 🟡 Medium | Client component |
+| 8.6 | Date range picker for analytics export (`ExportControls`) | ✅ | 🟡 Medium | Client component |
 | 8.7 | CSV export `GET /api/analytics/export?type=enrollments|orders|progress` | ✅ | 🟡 Medium | `GET /api/analytics/export` Node.js |
 | 8.8 | Nightly snapshot cron — `GET /api/cron/analytics-snapshot` | ⏳ | 🟢 Low | Daily at 02:00 UTC → `AnalyticsSnapshot` |
 | 8.9 | Admin platform dashboard `/admin` — GMV, MAU, revenue | ✅ | 🟢 Low | SUPERADMIN only |
@@ -1079,7 +1079,7 @@ RESEND_API_KEY=re_...
 | S4.4 | Server-side timer validation ใน finalizeAttempt | ⏳ | 🔴 Critical | `actions/quiz.ts` | KV timer check — future when KV configured |
 | S4.5 | Tab-switch detection → log `AttemptEvent` | ✅ | 🟡 Medium | `components/quiz/QuizRunner.tsx` | `visibilitychange` useEffect + `tabSwitchCount` state + amber warning banner |
 | S4.6 | แสดง attempt history + cooldown timer ถ้า maxAttempts reached | ✅ | 🟡 Medium | quiz result screen | attempt history table on start screen; maxAttempts guard in startAttempt() |
-| S4.7 | เชื่อม quiz result → trigger certificate flow | ⏳ | 🟡 Medium | `actions/quiz.ts` | future task |
+| S4.7 | เชื่อม quiz result → trigger certificate flow | ✅ | 🟡 Medium | `actions/quiz.ts` | `maybeCertifyOnQuizPass()` หลัง passed | 🟡 Medium | `actions/quiz.ts` | future task |
 | S4.8 | Quiz result review mode — หลัง submit แสดงทุกข้อพร้อม: คำตอบที่เลือก / คำตอบที่ถูก / คำอธิบาย | ✅ | 🟡 Medium | `components/quiz/QuizRunner.tsx` | `ResultScreen` with `showReview` toggle; green/red option highlights |
 | S4.9 | Enforce `maxAttempts` — ตรวจนับ attempts ก่อน `startAttempt()`; แสดงปุ่ม retry พร้อม cooldown | ✅ | 🟡 Medium | `actions/quiz.ts` + quiz start screen | `attemptsLeft` computed; button disabled when 0; `startError` for max_attempts |
 | S4.10 | Attempt history — แสดงประวัติการทำข้อสอบ (วันที่, คะแนน, pass/fail) บนหน้า quiz | ✅ | 🟢 Low | quiz page | `attemptHistory` prop table on quiz start screen |
@@ -1103,7 +1103,7 @@ RESEND_API_KEY=re_...
 | S5.9 | เพิ่ม `ProgressEvent` insert ทุก play/pause/complete | ✅ | 🟢 Low | `app/api/progress/route.ts` | `db.progressEvent.create()` wired |
 | S5.10 | หน้า `/dashboard/certificates` — grid ใบประกาศทั้งหมดของ student | ✅ | 🟡 Medium | `app/[locale]/(student)/dashboard/certificates/page.tsx` | cert gallery with CourseThumbnail + issued date + View/Download buttons |
 | S5.11 | Free course enrollment action — `createFreeEnrollment(courseId)` Server Action | ✅ | 🔴 High | `actions/enrollment.ts` (ไฟล์ใหม่) | `db.enrollment.create` + redirect to first lesson |
-| S5.12 | Post-payment enrollment — Stripe webhook → `db.enrollment.create` เมื่อ payment.succeeded | ⏳ | 🔴 High | `app/api/webhooks/stripe/route.ts` | `checkout.session.completed` event → create Enrollment |
+| S5.12 | Post-payment enrollment — Stripe webhook → Order(PAID) + Enrollment + Certificate | ✅ | 🔴 High | `app/api/webhooks/stripe/route.ts` | `completeOrder()` on `checkout.session.completed` | 🔴 High | `app/api/webhooks/stripe/route.ts` | `checkout.session.completed` event → create Enrollment |
 | S5.13 | Progress analytics chart — กราฟชั่วโมงเรียนรายสัปดาห์ | ✅ | 🟢 Low | dashboard page | CSS-only div-based 7-day bar chart from `ProgressEvent` data |
 | S5.14 | Quiz score display ใน dashboard — แสดงคะแนนล่าสุดของแต่ละ quiz ที่ทำ | ✅ | 🟢 Low | dashboard page | Recent quiz attempts section with score circles + pass/fail badges |
 
@@ -1247,6 +1247,37 @@ S5 Track Progress          █████████████████�
 
 ---
 
+## Phase 19 — Company CMS + Advanced Admin (Session 17-18 — 2026-05-30)
+
+> Advanced Admin tools + Company content management (เกี่ยวกับเรา/บล็อก/ร่วมงาน/สื่อ)
+
+### 19.1 — Advanced Admin
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 19.1.1 | Admin Server Actions (coupons, announcements, moderation, analytics) | ✅ | `actions/admin.ts` | createCoupon, createAnnouncement, deletePost, approveCourse, getAnalyticsData, bulkUpdateUserRole |
+| 19.1.2 | Admin Analytics page — revenue/user charts + top courses | ✅ | `admin/analytics/page.tsx` | KPI cards + bar charts + CSV export |
+| 19.1.3 | Admin Coupons page — create/delete discount codes | ✅ | `admin/coupons/page.tsx` | usage progress bar + status badges |
+| 19.1.4 | Admin Announcements page — platform-wide notices | ✅ | `admin/announcements/page.tsx` | 4 types + preview + toggle |
+| 19.1.5 | Admin Moderation page — flagged posts + course approval | ✅ | `admin/moderation/page.tsx` | tabs + delete/approve/reject |
+| 19.1.6 | Admin System Health page — service status + cron jobs | ✅ | `admin/system/page.tsx` | 10 services env check + DB ping |
+| 19.1.7 | AdminSidebar — 6 new nav items | ✅ | `components/layout/AdminSidebar.tsx` | Analytics, Coupons, Announcements, Content, Moderation, System |
+
+### 19.2 — Company CMS
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 19.2.1 | Shared content store | ✅ | `lib/company-content.ts` | About/Blog/Careers/Press in-memory store |
+| 19.2.2 | Content Server Actions (CRUD all 4 sections) | ✅ | `actions/content.ts` | admin guard + revalidatePath + mock fallback |
+| 19.2.3 | Admin Content manager — 4 tabs | ✅ | `admin/content/ContentManager.tsx` | About/Blog/Careers/Press editing |
+| 19.2.4 | Public: เกี่ยวกับเรา (`/about`) | ✅ | `(public)/about/page.tsx` | hero, stats, mission, story, values |
+| 19.2.5 | Public: บล็อก (`/blog` + `/blog/[slug]`) | ✅ | `(public)/blog/` | list + detail, published-only |
+| 19.2.6 | Public: ร่วมงานกับเรา (`/careers`) | ✅ | `(public)/careers/page.tsx` | job openings + apply mailto |
+| 19.2.7 | Public: สื่อ (`/press`) | ✅ | `(public)/press/page.tsx` | press items + external links |
+| 19.2.8 | Footer COMPANY links now resolve (was 404) | ✅ | — | about/blog/careers/press all live |
+
+---
+
 ## Success KPIs (from PRD)
 
 Track these after launch:
@@ -1291,6 +1322,7 @@ v1.1 (Month 6+)
 5. Update "Last updated" date at the top of this file
 
 > **Tip:** Use `Ctrl+F` to search for `🔄` to find what's currently in progress.
+
 
 
 
