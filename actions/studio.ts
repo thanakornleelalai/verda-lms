@@ -363,7 +363,7 @@ export async function redirectToStudio(locale: string) {
 type QuestionInput = {
   id?: string;
   text: string;
-  type: "SINGLE" | "MULTIPLE";
+  type: "SINGLE" | "MULTIPLE" | "TRUE_FALSE";
   order: number;
   points: number;
   options: { id?: string; text: string; isCorrect: boolean; order: number }[];

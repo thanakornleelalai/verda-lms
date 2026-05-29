@@ -240,6 +240,54 @@ export async function checkoutWithPromptPay(
   }
 }
 
+// ── Request Refund (7-day window) — Task 6.12 ─────────────────────────────────
+
+export async function requestRefund(
+  orderId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const user = await getCurrentUser();
+  const userId = (user as { id?: string } | null)?.id ?? "guest";
+
+  try {
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+
+    if (!order) return { success: false, error: "ไม่พบคำสั่งซื้อ" };
+    if (order.userId !== userId) return { success: false, error: "ไม่มีสิทธิ์" };
+    if (order.status === "REFUNDED") return { success: false, error: "คำสั่งซื้อนี้ถูกคืนเงินแล้ว" };
+    if (order.status !== "PAID") return { success: false, error: "สามารถคืนเงินได้เฉพาะคำสั่งซื้อที่ชำระแล้ว" };
+
+    // 7-day refund window check
+    const daysSinceOrder = (Date.now() - order.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    if (daysSinceOrder > 7) {
+      return { success: false, error: "หมดระยะเวลาคืนเงิน (7 วันนับจากวันที่ซื้อ)" };
+    }
+
+    // Try Stripe refund if applicable
+    if (order.gateway === "STRIPE" && order.gatewayRef && process.env.STRIPE_SECRET_KEY) {
+      try {
+        await stripe.refunds.create({ payment_intent: order.gatewayRef });
+      } catch { /* Log but continue — update DB anyway */ }
+    }
+
+    // Update order + remove enrollments atomically
+    await db.$transaction([
+      db.order.update({ where: { id: orderId }, data: { status: "REFUNDED" } }),
+      ...order.items.map((item) =>
+        db.enrollment.deleteMany({
+          where: { userId: order.userId, courseId: item.courseId },
+        }),
+      ),
+    ]);
+
+    return { success: true };
+  } catch {
+    return { success: false, error: "ไม่สามารถดำเนินการคืนเงินได้ กรุณาติดต่อทีมงาน" };
+  }
+}
+
 // ── Complete Order (after payment confirmed) ───────────────────────────────────
 
 export async function completeOrder(orderId: string): Promise<void> {

@@ -27,7 +27,7 @@ type OptionDraft = {
 type QuestionDraft = {
   id: string;
   text: string;
-  type: "SINGLE" | "MULTIPLE";
+  type: "SINGLE" | "MULTIPLE" | "TRUE_FALSE";
   order: number;
   points: number;
   options: OptionDraft[];
@@ -84,7 +84,27 @@ export default function QuizBuilderPage() {
 
   function updateQuestion(qId: string, patch: Partial<QuestionDraft>) {
     setQuestions((prev) =>
-      prev.map((q) => (q.id === qId ? { ...q, ...patch } : q))
+      prev.map((q) => {
+        if (q.id !== qId) return q;
+        // When switching to TRUE_FALSE, replace options with ถูก/ผิด
+        if (patch.type === "TRUE_FALSE") {
+          return {
+            ...q, ...patch,
+            options: [
+              { id: crypto.randomUUID(), text: "ถูก (True)", isCorrect: false, order: 1 },
+              { id: crypto.randomUUID(), text: "ผิด (False)", isCorrect: false, order: 2 },
+            ],
+          };
+        }
+        // When switching FROM TRUE_FALSE back to MCQ, restore 4 options
+        if ((patch.type === "SINGLE" || patch.type === "MULTIPLE") && q.type === "TRUE_FALSE") {
+          return {
+            ...q, ...patch,
+            options: [newOption(1), newOption(2), newOption(3), newOption(4)],
+          };
+        }
+        return { ...q, ...patch };
+      })
     );
   }
 
@@ -362,13 +382,14 @@ export default function QuizBuilderPage() {
                           value={q.type}
                           onChange={(e) =>
                             updateQuestion(q.id, {
-                              type: e.target.value as "SINGLE" | "MULTIPLE",
+                              type: e.target.value as "SINGLE" | "MULTIPLE" | "TRUE_FALSE",
                             })
                           }
                           className="w-full border border-line rounded-r2 px-3 h-[40px] text-[13px] bg-paper focus:outline-none focus:border-viridian"
                         >
                           <option value="SINGLE">เลือก 1 ข้อ</option>
-                          <option value="MULTIPLE">เลือกได้หลายข้อ</option>
+                          <option value="MULTIPLE">หลายข้อ</option>
+                          <option value="TRUE_FALSE">ถูก / ผิด</option>
                         </select>
                       </div>
                       <div className="shrink-0 w-[80px]">
@@ -388,16 +409,17 @@ export default function QuizBuilderPage() {
                     {/* Options */}
                     <div className="flex flex-col gap-2.5">
                       <p className="text-[12px] text-ink-3 font-mono uppercase tracking-wider">
-                        ตัวเลือก
-                        {q.type === "SINGLE"
-                          ? " — คลิกวงกลมเพื่อเลือกคำตอบที่ถูก"
-                          : " — คลิกวงกลมได้หลายข้อ"}
+                        {q.type === "TRUE_FALSE"
+                          ? "ตัวเลือก — คลิกวงกลมเพื่อเลือกคำตอบที่ถูก"
+                          : q.type === "SINGLE"
+                          ? "ตัวเลือก — คลิกวงกลมเพื่อเลือกคำตอบที่ถูก"
+                          : "ตัวเลือก — คลิกวงกลมได้หลายข้อ"}
                       </p>
                       {q.options.map((opt, oIdx) => (
                         <div key={opt.id} className="flex items-center gap-3">
                           <button
                             type="button"
-                            onClick={() => toggleCorrect(q.id, opt.id, q.type)}
+                            onClick={() => toggleCorrect(q.id, opt.id, q.type === "MULTIPLE" ? "MULTIPLE" : "SINGLE")}
                             className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                               opt.isCorrect
                                 ? "bg-ok border-ok text-white"
@@ -415,8 +437,9 @@ export default function QuizBuilderPage() {
                             onChange={(e) =>
                               updateOption(q.id, opt.id, { text: e.target.value })
                             }
+                            disabled={q.type === "TRUE_FALSE"}
                             placeholder={`ตัวเลือก ${OPTION_LABELS[oIdx]}`}
-                            className="flex-1 border border-line rounded-r2 px-3.5 h-[38px] text-[13px] font-thai bg-paper focus:outline-none focus:border-viridian transition-colors"
+                            className="flex-1 border border-line rounded-r2 px-3.5 h-[38px] text-[13px] font-thai bg-paper focus:outline-none focus:border-viridian transition-colors disabled:bg-paper-2 disabled:text-ink-3"
                           />
                         </div>
                       ))}
@@ -425,6 +448,11 @@ export default function QuizBuilderPage() {
                     {q.type === "MULTIPLE" && (
                       <p className="mt-3 text-[11px] text-ink-4 font-thai">
                         เลือกตัวเลือกที่ถูกได้มากกว่า 1 ข้อ — นักเรียนต้องเลือกให้ตรงทุกข้อจึงจะได้คะแนน
+                      </p>
+                    )}
+                    {q.type === "TRUE_FALSE" && (
+                      <p className="mt-3 text-[11px] text-ink-4 font-thai">
+                        คำถามถูก/ผิด — เลือกคำตอบที่ถูกต้องด้วยการคลิกวงกลม
                       </p>
                     )}
                   </div>
