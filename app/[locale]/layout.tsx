@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { routing } from "@/i18n/routing";
 import { PWAInstallBanner } from "@/components/pwa/PWAInstallBanner";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { VerdyChat } from "@/components/chatbot/VerdyChat";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -31,6 +32,7 @@ export default async function LocaleLayout({
         <ThemeProvider>
           {children}
           <PWAInstallBanner />
+          <VerdyChat />
         </ThemeProvider>
       </NextIntlClientProvider>
     </SessionProvider>
