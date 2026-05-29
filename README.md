@@ -1,67 +1,71 @@
 # VERDA LMS
 
-ระบบ Learning Management System แบบ Thai/English Bilingual สร้างด้วย Next.js 15 App Router  
-รองรับ 3 roles: นักเรียน · ผู้สอน · แอดมิน
+> ระบบจัดการการเรียนรู้ออนไลน์ (LMS) สองภาษา ไทย–อังกฤษ  
+> สร้างด้วย Next.js 15 · รองรับนักเรียน ผู้สอน และแอดมิน
 
 ---
 
-## Tech Stack
+## โปรเจกต์นี้คืออะไร?
 
-| Layer | Technology |
-|-------|------------|
-| Framework | Next.js 15 (App Router) + TypeScript |
-| Styling | Tailwind CSS |
-| Database | PostgreSQL (Neon) + Prisma 6 |
-| Auth | NextAuth v5 — Email/Password, Google, LINE, Phone OTP |
-| Video | Mux Player |
-| Payment | Stripe + Omise (PromptPay) |
-| Email | Resend |
-| Background Jobs | Inngest |
-| File Storage | Vercel Blob |
-| Cache / KV | Vercel KV (Redis) |
-| i18n | next-intl (TH / EN) |
-| State | Zustand + TanStack Query |
-| Deploy | Vercel (region: Singapore) |
+VERDA LMS คือแพลตฟอร์มเรียนออนไลน์คล้าย SkillLane หรือ Udemy  
+ผู้เรียนสามารถซื้อคอร์ส ดูวิดีโอ ทำแบบทดสอบ และรับใบประกาศนียบัตรได้  
+ผู้สอนมี Studio สำหรับอัปโหลดคอร์สและดู analytics  
+แอดมินจัดการผู้ใช้ คอร์ส และออกใบประกาศนียบัตรได้
 
 ---
 
-## Features
+## เทคโนโลยีที่ใช้
 
-### นักเรียน (Student)
-- เรียกดูและค้นหาคอร์สกว่า 200+ คอร์ส
-- ซื้อคอร์สผ่าน Stripe / PromptPay
-- ดูวิดีโอบทเรียนผ่าน Mux Player
-- ทำแบบทดสอบพร้อม timer และ A/B/C/D keyboard shortcuts
-- ระบบ progress tracking แบบ real-time
-- รับใบประกาศนียบัตรดิจิทัล (พิมพ์ / บันทึก PDF ได้)
-- แดชบอร์ดส่วนตัว — คอร์ส, certificate, การตั้งค่า
+| หมวด | เทคโนโลยี |
+|------|-----------|
+| Frontend | Next.js 15 (App Router) + TypeScript + Tailwind CSS |
+| ฐานข้อมูล | PostgreSQL บน Neon + Prisma 6 |
+| Authentication | NextAuth v5 — รองรับ Email, Google, LINE, Phone OTP |
+| วิดีโอ | Mux Player |
+| ชำระเงิน | Stripe (บัตรเครดิต) + Omise (PromptPay) |
+| อีเมล | Resend |
+| งานเบื้องหลัง | Inngest |
+| เก็บไฟล์ | Vercel Blob |
+| Cache | Vercel KV (Redis) |
+| หลายภาษา | next-intl (ไทย / อังกฤษ) |
+| Deploy | Vercel (เซิร์ฟเวอร์สิงคโปร์) |
 
-### ผู้สอน (Instructor)
-- Instructor Studio — จัดการคอร์สและบทเรียน
+---
+
+## ฟีเจอร์หลัก
+
+### สำหรับนักเรียน
+- ค้นหาและเรียกดูคอร์สกว่า 200+ คอร์ส
+- ซื้อคอร์สด้วยบัตรเครดิตหรือ PromptPay
+- ดูวิดีโอบทเรียนพร้อมติดตามความคืบหน้า
+- ทำแบบทดสอบพร้อมจับเวลา (กด A B C D จากคีย์บอร์ดได้)
+- รับและดาวน์โหลดใบประกาศนียบัตรดิจิทัล
+- แดชบอร์ดส่วนตัว — ดูคอร์สที่เรียน, certificate, ตั้งค่าโปรไฟล์
+
+### สำหรับผู้สอน
+- สร้างและแก้ไขคอร์สผ่าน Instructor Studio
 - อัปโหลดวิดีโอผ่าน Mux
-- สร้าง Quiz ต่อบทเรียน
-- ดู Analytics รายได้และผู้เรียน
-- จัดการรายชื่อนักเรียน
+- สร้างแบบทดสอบต่อบทเรียน
+- ดู Analytics รายได้และสถิติผู้เรียน
 
-### แอดมิน (Admin)
-- จัดการผู้ใช้ทั้งหมด (filter by role)
-- จัดการคอร์ส (filter by status)
-- ดู Orders และ Revenue
+### สำหรับแอดมิน
+- จัดการผู้ใช้ทั้งหมด กรองตาม role ได้
+- จัดการคอร์ส กรองตามสถานะได้
+- ดูรายการสั่งซื้อและรายได้
 - ออกใบประกาศนียบัตรให้ผู้เรียนด้วยตนเอง
 
-### ทั่วไป
-- รองรับ 2 ภาษา: ไทย / อังกฤษ (สลับอัตโนมัติตาม URL prefix `/th` `/en`)
-- Dark mode + Light mode + เลือก accent color
-- PWA รองรับ install บนมือถือ
-- ⌘K / Ctrl+K ค้นหาคอร์สได้ทันที
-- Forum ถาม-ตอบ
-- Leaderboard
+### ฟีเจอร์ทั่วไป
+- สลับภาษาไทย/อังกฤษ ผ่าน URL (`/th/...` หรือ `/en/...`)
+- Dark mode / Light mode และเลือก accent color ได้เอง
+- ติดตั้งเป็นแอปบนมือถือ (PWA)
+- กด `Ctrl+K` หรือ `⌘K` เพื่อค้นหาคอร์สทันที
+- ฟอรัมถาม-ตอบ และ Leaderboard
 
 ---
 
-## เริ่มต้นใช้งาน
+## เริ่มต้นรันโปรเจกต์
 
-### 1. Clone และติดตั้ง dependencies
+### ขั้นตอนที่ 1 — โหลดโค้ดลงเครื่อง
 
 ```bash
 git clone https://github.com/thanakornleelalai/verda-lms.git
@@ -69,156 +73,126 @@ cd verda-lms
 npm install
 ```
 
-### 2. ตั้งค่า Environment Variables
+### ขั้นตอนที่ 2 — ตั้งค่า Environment Variables
 
 ```bash
+# Windows
+copy .env.example .env.local
+
+# Mac / Linux
 cp .env.example .env.local
 ```
 
-เปิดไฟล์ `.env.local` แล้วกรอกค่าต่าง ๆ (ดูรายละเอียดด้านล่าง)
+จากนั้นเปิดไฟล์ `.env.local` แล้วกรอกค่าที่จำเป็น (ดูหัวข้อ Environment Variables ด้านล่าง)
 
-### 3. ตั้งค่า Database
+### ขั้นตอนที่ 3 — ตั้งค่าฐานข้อมูล
 
 ```bash
 npx prisma generate
 npx prisma db push
 ```
 
-### 4. รัน Development Server
+### ขั้นตอนที่ 4 — รันเซิร์ฟเวอร์
 
 ```bash
 npm run dev
 ```
 
-เปิดเบราว์เซอร์ที่ [http://localhost:3000](http://localhost:3000)
+เปิดเบราว์เซอร์ที่ **http://localhost:3000**
 
 ---
 
-## Environment Variables
+## Environment Variables ที่ต้องตั้งค่า
 
-คัดลอกจาก `.env.example` แล้วกรอกค่าจริง:
+| ตัวแปร | ใช้ทำอะไร | จำเป็น |
+|--------|-----------|--------|
+| `DATABASE_URL` | เชื่อมต่อ PostgreSQL (Neon) | ✅ |
+| `AUTH_SECRET` | เข้ารหัส session (สุ่มได้ 32 ตัวอักษร) | ✅ |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Login ด้วย Google | ไม่บังคับ |
+| `STRIPE_SECRET_KEY` | รับชำระเงินบัตรเครดิต | ไม่บังคับ |
+| `OMISE_SECRET_KEY` | รับชำระเงิน PromptPay | ไม่บังคับ |
+| `MUX_TOKEN_ID` / `MUX_TOKEN_SECRET` | อัปโหลดและเล่นวิดีโอ | ไม่บังคับ |
+| `RESEND_API_KEY` | ส่งอีเมล | ไม่บังคับ |
+| `BLOB_READ_WRITE_TOKEN` | เก็บไฟล์รูปภาพ | ไม่บังคับ |
+| `KV_URL` | Redis cache (quiz timer) | ไม่บังคับ |
+| `NEXT_PUBLIC_BASE_URL` | URL ของแอปตัวเอง | ✅ |
 
-```env
-# Database (Neon PostgreSQL)
-DATABASE_URL="postgresql://..."
-DIRECT_URL="postgresql://..."
-
-# Auth
-AUTH_SECRET="random-32-char-string"
-AUTH_URL="http://localhost:3000"
-AUTH_GOOGLE_ID="..."
-AUTH_GOOGLE_SECRET="..."
-
-# Payment
-STRIPE_SECRET_KEY="sk_test_..."
-STRIPE_WEBHOOK_SECRET="whsec_..."
-OMISE_SECRET_KEY="skey_test_..."
-
-# Video
-MUX_TOKEN_ID="..."
-MUX_TOKEN_SECRET="..."
-
-# Email
-RESEND_API_KEY="re_..."
-RESEND_FROM_EMAIL="noreply@verda.co.th"
-
-# Storage & Cache
-BLOB_READ_WRITE_TOKEN="vercel_blob_rw_..."
-KV_URL="redis://..."
-
-# App
-NEXT_PUBLIC_BASE_URL="http://localhost:3000"
-```
+> ดูรายละเอียดทั้งหมดได้ในไฟล์ `.env.example`
 
 ---
 
-## โครงสร้างโปรเจกต์
+## บัญชีทดสอบ (Development)
 
-```
-verda-lms/
-├── app/
-│   ├── [locale]/
-│   │   ├── (public)/        # หน้าสาธารณะ (home, courses, pricing…)
-│   │   ├── (auth)/          # login, signup, forgot-password
-│   │   ├── (student)/       # dashboard, learn, quiz, certificate
-│   │   ├── (instructor)/    # studio, analytics, course editor
-│   │   ├── (admin)/         # admin panel
-│   │   └── certificate/     # ดูและ preview ใบประกาศ
-│   └── api/                 # API routes
-├── components/
-│   ├── primitives/          # Button, Avatar, Tag, EyebrowLabel
-│   ├── layout/              # TopBar, Footer, Sidebar
-│   ├── course/              # CourseCard, CourseGrid
-│   ├── quiz/                # QuizRunner, QuizTimer, QuestionCard
-│   ├── learn/               # LessonPlayer, CourseReviewForm
-│   ├── certificate/         # PrintButton, ShareButtons
-│   └── theme/               # ThemeProvider, ThemeCustomizer
-├── lib/                     # auth, db, stripe, mux, resend…
-├── prisma/
-│   └── schema.prisma        # 29 models, 9 enums
-├── mock/                    # ข้อมูล mock สำหรับ development
-├── messages/
-│   ├── th.json              # ภาษาไทย
-│   └── en.json              # ภาษาอังกฤษ
-└── actions/                 # Server Actions
-```
+| บทบาท | อีเมล | รหัสผ่าน |
+|-------|-------|---------|
+| นักเรียน | `student@verda.dev` | `demo1234` |
+| ผู้สอน | `instructor@verda.dev` | `demo1234` |
+| แอดมิน | `admin@verda.dev` | `demo1234` |
 
 ---
 
-## Routes หลัก
+## หน้าหลักของระบบ
 
-| Path | หน้า |
-|------|------|
+| URL | หน้า |
+|-----|------|
 | `/th` | หน้าแรก |
-| `/th/courses` | รายการคอร์ส |
+| `/th/courses` | รายการคอร์สทั้งหมด |
 | `/th/courses/[slug]` | รายละเอียดคอร์ส |
-| `/th/learn/[slug]/[lessonId]` | หน้าเรียน |
+| `/th/learn/[slug]/[lessonId]` | หน้าเรียนวิดีโอ |
 | `/th/learn/[slug]/quiz/[id]` | แบบทดสอบ |
-| `/th/certificate/[certId]` | ใบประกาศนียบัตร |
+| `/th/certificate/[id]` | ใบประกาศนียบัตร |
 | `/th/dashboard` | แดชบอร์ดนักเรียน |
 | `/th/studio` | Instructor Studio |
 | `/th/admin` | Admin Panel |
-| `/th/login` | เข้าสู่ระบบ |
-| `/th/pricing` | แผนราคา |
-| `/th/forum` | Forum |
+| `/th/pricing` | แผนราคาสมาชิก |
+| `/th/forum` | ฟอรัมถาม-ตอบ |
+| `/th/login` | เข้าสู่ระบบ / สมัครสมาชิก |
 
 ---
 
-## Demo Accounts (Development)
-
-| Role | Email | Password |
-|------|-------|----------|
-| Student | `student@verda.dev` | `demo1234` |
-| Instructor | `instructor@verda.dev` | `demo1234` |
-| Admin | `admin@verda.dev` | `demo1234` |
-
----
-
-## Scripts
+## คำสั่งที่ใช้บ่อย
 
 ```bash
-npm run dev          # Development server
-npm run build        # Production build
-npm run start        # Production server
-npm run lint         # ESLint check
-npm run type-check   # TypeScript check
-npx prisma studio    # Database GUI
+npm run dev          # เปิด Development server
+npm run build        # Build สำหรับ production
+npm run lint         # ตรวจสอบ code style
+npm run type-check   # ตรวจสอบ TypeScript
+npx prisma studio    # เปิด GUI จัดการฐานข้อมูล
 ```
 
 ---
 
-## Deploy
+## การ Deploy บน Vercel
 
-โปรเจกต์นี้ตั้งค่าสำหรับ Vercel ไว้แล้ว:
-
-1. Import repo จาก GitHub เข้า Vercel
+1. ไปที่ **vercel.com** → Import จาก GitHub repo นี้
 2. ใส่ Environment Variables ทั้งหมดใน Vercel dashboard
-3. Vercel จะ auto-deploy ทุกครั้งที่ push ไปที่ `main`
+3. กด Deploy — ระบบจะ build และ deploy อัตโนมัติ
+4. ทุกครั้งที่ push code ไปที่ branch `main` จะ deploy ให้อัตโนมัติ
 
-CI/CD pipeline อยู่ที่ `.github/workflows/preview.yml` — รัน lint + typecheck ทุก PR
+> CI/CD: ทุก Pull Request จะรัน lint + typecheck อัตโนมัติ ผ่าน GitHub Actions
 
 ---
 
-## License
+## โครงสร้างโฟลเดอร์
 
-Private — All rights reserved © 2026 VERDA
+```
+verda-lms/
+├── app/                    ← หน้าและ API ทั้งหมด (Next.js App Router)
+│   ├── [locale]/
+│   │   ├── (public)/       ← หน้าสาธารณะ: home, courses, pricing, forum
+│   │   ├── (auth)/         ← login, signup, forgot-password
+│   │   ├── (student)/      ← dashboard, เรียน, quiz, certificate
+│   │   ├── (instructor)/   ← studio, สร้างคอร์ส, analytics
+│   │   └── (admin)/        ← admin panel
+│   └── api/                ← API endpoints
+├── components/             ← UI components แยกตาม feature
+├── lib/                    ← auth, database, payment, email
+├── prisma/                 ← database schema (29 models)
+├── mock/                   ← ข้อมูลจำลองสำหรับ development
+├── messages/               ← ไฟล์แปลภาษา th.json / en.json
+└── actions/                ← Server Actions
+```
+
+---
+
+*© 2026 VERDA — All rights reserved*
