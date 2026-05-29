@@ -2,7 +2,7 @@
 
 > **Platform:** Online Course Marketplace (Thai / English)
 > **Stack:** Next.js 15 · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Vercel
-> **Last updated:** 2026-05-19 (Session 14 — Phone+password login added; prefers-reduced-motion + ThemeCustomizer in Studio/Admin sidebars; all 19 pages confirmed 200 after cache clear)
+> **Last updated:** 2026-05-29 (Session 15 — Verdy AI Chatbot + Language Switcher + TH/GB Flag SVG + GitHub push + README/PRD updated)
 > **Version:** 1.0.0
 
 ---
@@ -1149,6 +1149,49 @@ S5 Track Progress          █████████████████�
 - TypeScript: `npx tsc --noEmit` exits with code 0
 
 **Status (2026-05-17):** All 8 tasks ✅ · TypeScript clean · mock fallbacks active in dev mode
+
+---
+
+---
+
+## Phase 17 — UI/UX Enhancements (Session 15 — 2026-05-29)
+
+> ฟีเจอร์เพิ่มเติมหลัง MVP เพื่อปรับปรุง UX และเพิ่ม engagement
+
+### 17.1 — Verdy AI Chatbot
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 17.1.1 | สร้าง VerdyChat widget component | ✅ | `components/chatbot/VerdyChat.tsx` | Floating bottom-right, 🤖 icon |
+| 17.1.2 | Keyword matching engine 25+ rules | ✅ | `components/chatbot/VerdyChat.tsx` | RegExp rules ครอบคลุมหัวข้อหลักทั้งหมด |
+| 17.1.3 | เพิ่มข้อมูล On-site PIM | ✅ | `components/chatbot/VerdyChat.tsx` | ที่อยู่ การเดินทาง Workshop schedule |
+| 17.1.4 | Redesign เป็น Female robot persona | ✅ | `components/chatbot/VerdyChat.tsx` | Verdy พูด ค่ะ/นะคะ น่ารัก มี Sparkle UI |
+| 17.1.5 | เพิ่ม Typing indicator + Unread badge | ✅ | `components/chatbot/VerdyChat.tsx` | dots animate + counter |
+| 17.1.6 | Minimize / Reset controls | ✅ | `components/chatbot/VerdyChat.tsx` | เหลือแถบแคบ + ล้างบทสนทนา |
+| 17.1.7 | Mount ใน root layout | ✅ | `app/[locale]/layout.tsx` | แสดงทุกหน้าทั้ง app |
+| 17.1.8 | สร้าง `/api/chat` route (AI fallback) | ✅ | `app/api/chat/route.ts` | ใช้ Anthropic SDK ถ้ามี ANTHROPIC_API_KEY |
+
+### 17.2 — Language Switcher (TH ⇄ EN)
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 17.2.1 | สร้างปุ่มสลับภาษาใน TopBar | ✅ | `components/layout/TopBar.tsx` | ระหว่าง ThemeCustomizer และ Cart |
+| 17.2.2 | `handleLocaleSwitch()` function | ✅ | `components/layout/TopBar.tsx` | `usePathname()` + replace locale + `router.push()` |
+| 17.2.3 | `FlagTH` SVG component | ✅ | `components/layout/TopBar.tsx` | 5 แถบ แดง/ขาว/น้ำเงิน/ขาว/แดง ตามมาตรฐาน |
+| 17.2.4 | `FlagGB` SVG component (Union Jack) | ✅ | `components/layout/TopBar.tsx` | UK flag สำหรับภาษาอังกฤษ |
+| 17.2.5 | Active/Target opacity state | ✅ | `components/layout/TopBar.tsx` | active 100%, target 40% |
+| 17.2.6 | Path preservation เมื่อสลับ | ✅ | `components/layout/TopBar.tsx` | `/th/courses` → `/en/courses` |
+
+### 17.3 — GitHub & Documentation
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 17.3.1 | `git init` | ✅ | — | initialized |
+| 17.3.2 | Initial commit + push | ✅ | — | 140 files, 30,792 insertions |
+| 17.3.3 | สร้าง README.md | ✅ | `README.md` | ภาษาไทย อ่านง่าย ครอบคลุมทุกหัวข้อ |
+| 17.3.4 | อัปเดต README.md | ✅ | `README.md` | เพิ่ม chatbot + language switcher + PIM |
+| 17.3.5 | อัปเดต PRD.md | ✅ | `PRD.md` | Feature 10 (Chatbot) + Feature 11 (Language Switcher) |
+| 17.3.6 | อัปเดต TASKS.md | ✅ | `TASKS.md` | Phase 17 session 15 |
 
 ---
 

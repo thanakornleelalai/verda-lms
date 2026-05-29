@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.100.1",
     "@mux/mux-node": "^14.0.1",
     "@mux/mux-player-react": "^3.13.0",
     "@prisma/client": "6.19.3",

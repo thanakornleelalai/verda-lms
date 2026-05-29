@@ -2,7 +2,7 @@
 
 > **Platform:** Online Course Marketplace (Thai / English Bilingual)
 > **Version:** 1.0.0
-> **Last updated:** 2026-05-19 (Session 14 — Certificate issuance form + preview page added)
+> **Last updated:** 2026-05-29 (Session 15 — Verdy AI Chatbot + Language Switcher + Flag icons)
 > **Status:** Core modules complete — demo-ready
 
 ---
@@ -609,6 +609,82 @@ Static route takes priority over [certId] dynamic route in Next.js App Router.
 
 ---
 
+---
+
+## Feature 10 — Verdy AI Chatbot
+
+**สถานะ:** ✅ Implemented (2026-05-29)
+
+### Problem Statement
+ผู้ใช้ต้องการผู้ช่วยตอบคำถามเกี่ยวกับแพลตฟอร์ม คอร์สเรียน ราคา และสถานที่เรียน On-site ได้ทันทีโดยไม่ต้องรอทีม support
+
+### User Stories
+| ID | As a... | I want to... | So that... |
+|----|---------|-------------|-----------|
+| US-10.1 | ผู้เยี่ยมชม | ถามเรื่องคอร์สและราคาได้ทันที | ตัดสินใจสมัครได้เร็วขึ้น |
+| US-10.2 | ผู้สนใจ | ถามสถานที่เรียน On-site | วางแผนการเดินทางได้ |
+| US-10.3 | ผู้ใช้ | ได้รับคำตอบเป็นภาษาไทย น่ารัก และเป็นมิตร | รู้สึกได้รับการดูแลจากแพลตฟอร์ม |
+
+### Acceptance Criteria
+- [x] **AC-10.1 — Widget ลอย:** ปุ่มหุ่นยนต์ 🤖 มุมขวาล่างทุกหน้า พร้อม sparkle badge
+- [x] **AC-10.2 — Female robot persona:** Verdy พูดสุภาพ น่ารัก ใช้ "ค่ะ/นะคะ" และ "หนู" แทนตัวเอง
+- [x] **AC-10.3 — Keyword matching 25+ rules:** ครอบคลุมคอร์ส ราคา สถานที่ ใบประกาศ ผู้สอน ชำระเงิน ฯลฯ
+- [x] **AC-10.4 — On-site PIM info:** ที่อยู่ PIM สถาบันปัญญาภิวัฒน์ การเดินทาง สิ่งอำนวยความสะดวก
+- [x] **AC-10.5 — Quick questions:** 4 ปุ่มคำถามด่วน กดแล้วถามได้ทันที
+- [x] **AC-10.6 — Typing indicator:** จุดกระพริบสีเขียวขณะ bot กำลังตอบ
+- [x] **AC-10.7 — Minimize / Reset:** ย่อหน้าต่างเหลือแถบแคบ และล้างบทสนทนาได้
+- [x] **AC-10.8 — Unread badge:** แสดงตัวเลขเมื่อมีข้อความใหม่ขณะหน้าต่างปิด
+- [x] **AC-10.9 — ไม่ต้องการ API key:** ใช้ keyword matching ทำงานได้ทันทีโดยไม่ต้องพึ่ง external API
+
+### On-site Information Covered
+- 📍 PIM — สถาบันปัญญาภิวัฒน์ ถนนแจ้งวัฒนะ เขตหลักสี่ กรุงเทพฯ 10210
+- 🚇 MRT สายสีชมพู สถานี PIM
+- Workshop / Bootcamp / Intensive 5 วัน
+- ใบประกาศร่วม VERDA + PIM
+
+### Files
+| File | Purpose |
+|------|---------|
+| `components/chatbot/VerdyChat.tsx` | Widget ครบชุด: UI + keyword engine + 25 rules |
+| `app/[locale]/layout.tsx` | Import `<VerdyChat />` — แสดงทุกหน้า |
+
+---
+
+## Feature 11 — Language Switcher (TH ⇄ EN)
+
+**สถานะ:** ✅ Implemented (2026-05-29)
+
+### Problem Statement
+ผู้ใช้ต้องการสลับภาษา UI ระหว่างไทยและอังกฤษได้ง่าย จาก TopBar ทุกหน้า
+
+### User Stories
+| ID | As a... | I want to... | So that... |
+|----|---------|-------------|-----------|
+| US-11.1 | ผู้ใช้ | กดปุ่มสลับภาษา TH ↔ EN | เปลี่ยน UI language ได้ทันที |
+| US-11.2 | ผู้ใช้ | เห็น flag ของภาษาปัจจุบันและภาษาปลายทาง | รู้ทันทีว่ากดแล้วจะเปลี่ยนเป็นอะไร |
+| US-11.3 | ผู้ใช้ | รักษา URL path เดิมเมื่อสลับภาษา | ไม่ต้องกลับไปหน้าแรกทุกครั้ง |
+
+### Acceptance Criteria
+- [x] **AC-11.1 — ปุ่มใน TopBar:** อยู่ระหว่าง ThemeCustomizer และ Cart icon
+- [x] **AC-11.2 — Flag SVG inline:** ธงชาติไทย (5 แถบ แดง/ขาว/น้ำเงิน/ขาว/แดง) และ Union Jack (UK) วาดเป็น inline SVG
+- [x] **AC-11.3 — Active / Target state:** ธงปัจจุบัน opacity 100%, ธงปลายทาง opacity 40%
+- [x] **AC-11.4 — Path preservation:** `/th/courses/xxx` → `/en/courses/xxx` (ไม่กลับ root)
+- [x] **AC-11.5 — Hover style:** เปลี่ยนสีเป็น viridian เมื่อ hover เหมือน TopBar element อื่น
+- [x] **AC-11.6 — Tooltip:** แสดงข้อความบอก action ที่จะเกิดขึ้น
+
+### Technical Design
+```
+usePathname() → replace /{locale}/ → router.push(newPath)
+Flag components: <FlagTH /> และ <FlagGB /> เป็น inline SVG ไม่ต้องโหลดภาพภายนอก
+```
+
+### Files
+| File | Purpose |
+|------|---------|
+| `components/layout/TopBar.tsx` | เพิ่ม `FlagTH`, `FlagGB` SVG components + `handleLocaleSwitch()` + ปุ่มสลับ |
+
+---
+
 ## 5. Supporting Pages & Features
 
 | Page | Route | Status |
@@ -656,6 +732,7 @@ Tenant (multi-tenant ready)
 | `/api/cron/analytics` | GET | Daily analytics rollup |
 | `/api/cron/reminders` | GET | Streak reminder emails |
 | `/api/inngest` | POST | Background job handler |
+| `/api/chat` | POST | Verdy chatbot (keyword engine / AI fallback) |
 
 ---
 
