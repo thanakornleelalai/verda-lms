@@ -1,0 +1,415 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   VERDA Design System — CSS Custom Properties
+   ============================================================ */
+
+/* Smooth color transition when theme toggles */
+*, *::before, *::after {
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+/* Exclude transitions for elements that shouldn't animate */
+svg, img, video, canvas { transition: none !important; }
+
+/* Disable all transitions for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+:root {
+  /* — Color — */
+  --ink:          #0E1612;
+  --ink-2:        #2C3833;
+  --ink-3:        #5C6863;
+  --ink-4:        #8A938E;
+  --line:         #E5E2D8;
+  --line-2:       #EFEDE5;
+  --paper:        #FAF8F1;
+  --paper-2:      #F4F1E6;
+  --paper-3:      #FFFFFF;
+
+  --viridian:     #0F5D4A;
+  --viridian-2:   #0A4537;
+  --viridian-3:   #1A7A60;
+  --viridian-tint:#E6EFE9;
+  --viridian-wash:#F0F4EE;
+  --viridian-rgb: 15 93 74;
+
+  --gold:         #B68B47;
+  --clay:         #B4633C;
+  --plum:         #5B3A6B;
+  --sage:         #A8B4A3;
+
+  --ok:           #1F7A4F;
+  --ok-rgb:       31 122 79;
+  --warn:         #C28A2A;
+  --warn-rgb:     194 138 42;
+  --danger:       #B0392E;
+  --danger-rgb:   176 57 46;
+
+  /* — Radius — */
+  --r-1: 4px;
+  --r-2: 8px;
+  --r-3: 14px;
+  --r-4: 22px;
+  --r-pill: 999px;
+
+  /* — Shadows — */
+  --shadow-sm: 0 1px 0 rgba(14,22,18,0.04), 0 1px 2px rgba(14,22,18,0.04);
+  --shadow-md: 0 1px 0 rgba(14,22,18,0.04), 0 8px 24px -10px rgba(14,22,18,0.12);
+  --shadow-lg: 0 1px 0 rgba(14,22,18,0.04), 0 30px 60px -24px rgba(14,22,18,0.18);
+
+  /* — Typography — */
+  --f-display: "Instrument Serif", "Noto Serif Display", Georgia, serif;
+  --f-sans:    "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --f-thai:    "IBM Plex Sans Thai", "Manrope", -apple-system, sans-serif;
+  --f-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ============================================================
+   Color Themes — Light mode (override only --viridian-* family)
+   Specificity 0-1-0. Default (viridian) lives in :root above.
+   CSS cascade order: :root → [data-color] → [data-theme="dark"]
+   → [data-theme="dark"][data-color]  (highest specificity wins)
+   ============================================================ */
+
+[data-color="red"] {
+  --viridian:     #C0392B;
+  --viridian-2:   #922B21;
+  --viridian-3:   #E74C3C;
+  --viridian-tint:#FDEDEC;
+  --viridian-wash:#FEF9F9;
+  --viridian-rgb: 192 57 43;
+}
+
+[data-color="blue"] {
+  --viridian:     #2563EB;
+  --viridian-2:   #1D4ED8;
+  --viridian-3:   #3B82F6;
+  --viridian-tint:#DBEAFE;
+  --viridian-wash:#EFF6FF;
+  --viridian-rgb: 37 99 235;
+}
+
+[data-color="pink"] {
+  --viridian:     #DB2777;
+  --viridian-2:   #BE185D;
+  --viridian-3:   #EC4899;
+  --viridian-tint:#FCE7F3;
+  --viridian-wash:#FDF2F8;
+  --viridian-rgb: 219 39 119;
+}
+
+[data-color="amber"] {
+  --viridian:     #C2570A;
+  --viridian-2:   #9A3E08;
+  --viridian-3:   #EA6A0A;
+  --viridian-tint:#FEF3C7;
+  --viridian-wash:#FFFBEB;
+  --viridian-rgb: 194 87 10;
+}
+
+[data-color="purple"] {
+  --viridian:     #7C3AED;
+  --viridian-2:   #6D28D9;
+  --viridian-3:   #8B5CF6;
+  --viridian-tint:#EDE9FE;
+  --viridian-wash:#F5F3FF;
+  --viridian-rgb: 124 58 237;
+}
+
+/* ============================================================
+   Dark Theme — Override CSS vars when [data-theme="dark"]
+   ============================================================ */
+[data-theme="dark"] {
+  /* Text — inverted to cream tones */
+  --ink:          #E7E5DA;
+  --ink-2:        #C5C9C4;
+  --ink-3:        #8A938E;
+  --ink-4:        #5C6863;
+
+  /* Borders — dark greenish-gray */
+  --line:         #253029;
+  --line-2:       #1C2621;
+
+  /* Surfaces — deep ink tones */
+  --paper:        #0E1612;
+  --paper-2:      #131A16;
+  --paper-3:      #1C2420;
+
+  /* Brand green — brighter on dark backgrounds for contrast */
+  --viridian:     #2FA87A;
+  --viridian-2:   #1F8060;
+  --viridian-3:   #3DC98E;
+  --viridian-tint:#0F2922;
+  --viridian-wash:#0A1F18;
+  --viridian-rgb: 47 168 122;
+
+  /* Accent colors — slightly lighter for dark bg readability */
+  --gold:         #D4A853;
+  --clay:         #D4754A;
+  --plum:         #8A5EAB;
+  --sage:         #A8B4A3;
+
+  /* Semantic — use vibrant variants on dark bg */
+  --ok:           #22C55E;
+  --ok-rgb:       34 197 94;
+  --warn:         #F59E0B;
+  --warn-rgb:     245 158 11;
+  --danger:       #EF4444;
+  --danger-rgb:   239 68 68;
+
+  /* Shadows — more visible on dark */
+  --shadow-sm: 0 1px 0 rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 1px 0 rgba(0,0,0,0.2), 0 8px 24px -10px rgba(0,0,0,0.4);
+  --shadow-lg: 0 1px 0 rgba(0,0,0,0.2), 0 30px 60px -24px rgba(0,0,0,0.5);
+}
+
+/* ============================================================
+   Dark + Color combinations  (specificity 0-2-0)
+   Must come AFTER [data-theme="dark"] and [data-color="*"] blocks.
+   Only override the --viridian-* family; ink/paper/line come
+   from [data-theme="dark"] above and remain correct.
+   ============================================================ */
+
+/* Viridian dark is already in [data-theme="dark"] — no override needed */
+
+[data-theme="dark"][data-color="red"] {
+  --viridian:     #F87171;
+  --viridian-2:   #EF4444;
+  --viridian-3:   #FCA5A5;
+  --viridian-tint:#450A0A;
+  --viridian-wash:#2D0909;
+  --viridian-rgb: 248 113 113;
+}
+
+[data-theme="dark"][data-color="blue"] {
+  --viridian:     #60A5FA;
+  --viridian-2:   #3B82F6;
+  --viridian-3:   #93C5FD;
+  --viridian-tint:#0C1A3A;
+  --viridian-wash:#091227;
+  --viridian-rgb: 96 165 250;
+}
+
+[data-theme="dark"][data-color="pink"] {
+  --viridian:     #F472B6;
+  --viridian-2:   #EC4899;
+  --viridian-3:   #FBCFE8;
+  --viridian-tint:#42041C;
+  --viridian-wash:#2D0312;
+  --viridian-rgb: 244 114 182;
+}
+
+[data-theme="dark"][data-color="amber"] {
+  --viridian:     #FCD34D;
+  --viridian-2:   #F59E0B;
+  --viridian-3:   #FDE68A;
+  --viridian-tint:#3D2000;
+  --viridian-wash:#2A1600;
+  --viridian-rgb: 252 211 77;
+}
+
+[data-theme="dark"][data-color="purple"] {
+  --viridian:     #A78BFA;
+  --viridian-2:   #8B5CF6;
+  --viridian-3:   #C4B5FD;
+  --viridian-tint:#2E1065;
+  --viridian-wash:#1E0A45;
+  --viridian-rgb: 167 139 250;
+}
+
+/* — Base reset — */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-thai);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.005em;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; border: 0; background: transparent; color: inherit; }
+img { display: block; max-width: 100%; }
+
+/* ── Typography helpers ─────────────────────────────────────────────── */
+@layer utilities {
+  .font-display { font-family: var(--f-display); }
+  .font-sans    { font-family: var(--f-sans); }
+  .font-thai    { font-family: var(--f-thai); }
+  .font-mono    { font-family: var(--f-mono); }
+
+  .text-display {
+    font-family: var(--f-display);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.04;
+  }
+
+  .eyebrow {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+}
+
+/* ── Placeholder image stripes ─────────────────────────────────────── */
+@layer components {
+  .ph-stripes {
+    background:
+      repeating-linear-gradient(
+        135deg,
+        var(--paper-2) 0 12px,
+        var(--line-2) 12px 13px
+      );
+  }
+
+  .ph-stripes-dark {
+    background:
+      repeating-linear-gradient(
+        135deg,
+        #1c2421 0 12px,
+        #232a26 12px 13px
+      );
+  }
+
+  /* Dashed divider */
+  .divider-dashed {
+    height: 1px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--line) 0 6px,
+      transparent 6px 12px
+    );
+    border: 0;
+  }
+
+  /* Form input base */
+  .input-base {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    padding: 0 14px;
+    height: 42px;
+    font-size: 14px;
+    font-family: var(--f-thai);
+    background: var(--paper-3);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 150ms ease;
+  }
+  .input-base:focus { border-color: var(--viridian); }
+  textarea.input-base { height: auto; padding-top: 10px; padding-bottom: 10px; }
+  select.input-base { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235C6863' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+  /* Scroll row */
+  .scroll-row {
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink-4) var(--line-2);
+  }
+  .scroll-row::-webkit-scrollbar { height: 6px; }
+  .scroll-row::-webkit-scrollbar-track { background: var(--line-2); border-radius: 999px; }
+  .scroll-row::-webkit-scrollbar-thumb { background: var(--ink-4); border-radius: 999px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   FONT SIZE SCALING — data-fontsize attribute on <html>
+   Uses zoom so ALL elements scale, including hardcoded-px Tailwind classes.
+   zoom: 0.87 ≈ "small" (−13%),  zoom: 1.14 ≈ "large" (+14%)
+   ══════════════════════════════════════════════════════════════════ */
+[data-fontsize="sm"] body {
+  zoom: 0.87;
+}
+[data-fontsize="lg"] body {
+  zoom: 1.14;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ANIMATION KEYFRAMES
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Floating course cards in hero */
+@keyframes float-a {
+  0%, 100% { transform: translateY(0px) rotate(2deg); }
+  50%       { transform: translateY(-12px) rotate(2deg); }
+}
+@keyframes float-b {
+  0%, 100% { transform: translateY(0px) rotate(-1.5deg); }
+  50%       { transform: translateY(-9px) rotate(-1.5deg); }
+}
+/* Background blob drift */
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(24px, -18px) scale(1.04); }
+  66%       { transform: translate(-18px, 12px) scale(0.97); }
+}
+/* Trial CTA ambient glow pulse */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 4px 20px rgba(109,40,217,0.35), 0 1px 6px rgba(190,24,93,0.20); }
+  50%       { box-shadow: 0 8px 40px rgba(109,40,217,0.55), 0 4px 16px rgba(190,24,93,0.35); }
+}
+/* Hero trial badge bounce */
+@keyframes badge-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TRIAL CTA BUTTON — gradient glow pill
+   ══════════════════════════════════════════════════════════════════ */
+.trial-cta {
+  background: linear-gradient(135deg, #6D28D9 0%, #C2185B 60%, #D97706 100%);
+  background-size: 200% auto;
+  box-shadow: 0 4px 20px rgba(109,40,217,0.35), 0 1px 4px rgba(109,40,217,0.20);
+  animation: pulse-glow 3s ease-in-out infinite;
+  transition: transform 150ms ease, box-shadow 150ms ease, background-position 400ms ease;
+  border: none;
+  cursor: pointer;
+}
+.trial-cta:hover {
+  background-position: right center;
+  box-shadow: 0 8px 32px rgba(109,40,217,0.55), 0 2px 8px rgba(190,24,93,0.30);
+  transform: translateY(-2px);
+  animation: none;
+}
+.trial-cta:active { transform: translateY(0); }
+
+/* ══════════════════════════════════════════════════════════════════
+   RIPPLE on primary CTA buttons
+   ══════════════════════════════════════════════════════════════════ */
+.ripple-btn {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.28) 0%, transparent 65%);
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.45s ease, opacity 0.45s ease;
+}
+.ripple-btn:active::after {
+  transform: scale(2.8);
+  opacity: 1;
+  transition: none;
+}

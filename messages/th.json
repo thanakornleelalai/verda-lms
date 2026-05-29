@@ -1,0 +1,106 @@
+{
+  "nav": {
+    "browse": "คอร์สทั้งหมด",
+    "instructors": "ผู้สอน",
+    "pricing": "แผนราคา",
+    "login": "เข้าสู่ระบบ",
+    "signup": "สมัครสมาชิก",
+    "dashboard": "แดชบอร์ด",
+    "studio": "Studio",
+    "search": "ค้นหา"
+  },
+  "promo": {
+    "text": "🎉 โปรโมชั่นต้อนรับ — สมัครวันนี้รับส่วนลด 30% คอร์สแรก",
+    "cta": "ดูโปรโมชั่น"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "— SCHOOL OF PRACTICE",
+      "headline": "เรียนกับผู้เชี่ยวชาญที่",
+      "headlineAccent": "ทำงานจริง",
+      "sub": "คอร์สออนไลน์คุณภาพสูงจากผู้เชี่ยวชาญตัวจริง เรียนได้ทุกที่ ทุกเวลา บนทุกอุปกรณ์",
+      "ctaPrimary": "เริ่มเรียนฟรี",
+      "ctaSecondary": "ดูคอร์สทั้งหมด"
+    },
+    "stats": {
+      "learners": "ผู้เรียน",
+      "courses": "คอร์ส",
+      "instructors": "ผู้สอน",
+      "completionRate": "อัตราการสำเร็จ"
+    },
+    "featured": {
+      "eyebrow": "— FEATURED COURSES",
+      "title": "คอร์สแนะนำ",
+      "sub": "คัดสรรโดยทีม VERDA",
+      "more": "ดูทั้งหมด →"
+    },
+    "categories": {
+      "eyebrow": "— BROWSE BY CATEGORY",
+      "title": "เลือกตามหมวดหมู่"
+    },
+    "instructors": {
+      "eyebrow": "— OUR INSTRUCTORS",
+      "title": "สอนโดยผู้เชี่ยวชาญตัวจริง",
+      "more": "ดูผู้สอนทั้งหมด →"
+    }
+  },
+  "course": {
+    "enroll": "ลงทะเบียนเรียน",
+    "addToCart": "เพิ่มในตะกร้า",
+    "preview": "ดูตัวอย่าง",
+    "enrolled": "กำลังเรียน",
+    "lessons": "บทเรียน",
+    "students": "ผู้เรียน",
+    "rating": "คะแนน",
+    "lastUpdated": "อัปเดตล่าสุด",
+    "level": {
+      "beginner": "ผู้เริ่มต้น",
+      "intermediate": "ระดับกลาง",
+      "advanced": "ระดับสูง"
+    }
+  },
+  "dashboard": {
+    "welcome": "ยินดีต้อนรับกลับมา",
+    "myCourses": "คอร์สของฉัน",
+    "continueLearn": "เรียนต่อ",
+    "streak": "วันที่เรียนต่อเนื่อง",
+    "completed": "สำเร็จแล้ว",
+    "inProgress": "กำลังเรียน"
+  },
+  "auth": {
+    "login": {
+      "title": "เข้าสู่ระบบ",
+      "email": "อีเมล",
+      "password": "รหัสผ่าน",
+      "remember": "จดจำฉัน",
+      "forgot": "ลืมรหัสผ่าน?",
+      "submit": "เข้าสู่ระบบ",
+      "orWith": "หรือเข้าสู่ระบบด้วย"
+    },
+    "signup": {
+      "title": "สมัครสมาชิก",
+      "name": "ชื่อ-นามสกุล",
+      "email": "อีเมล",
+      "password": "รหัสผ่าน",
+      "terms": "ฉันยอมรับ",
+      "termsLink": "ข้อกำหนดการใช้งาน",
+      "submit": "สมัครสมาชิก"
+    },
+    "google": "เข้าสู่ระบบด้วย Google",
+    "line": "เข้าสู่ระบบด้วย LINE"
+  },
+  "footer": {
+    "tagline": "เรียนกับผู้เชี่ยวชาญที่ทำงานจริง",
+    "about": "เกี่ยวกับเรา",
+    "blog": "บล็อก",
+    "careers": "ร่วมงานกับเรา",
+    "press": "สื่อ",
+    "courses": "คอร์สทั้งหมด",
+    "instructors": "สอนกับ VERDA",
+    "affiliate": "พันธมิตร",
+    "help": "ช่วยเหลือ",
+    "privacy": "นโยบายความเป็นส่วนตัว",
+    "terms": "ข้อกำหนดการใช้งาน",
+    "copyright": "© 2026 VERDA. All rights reserved."
+  }
+}

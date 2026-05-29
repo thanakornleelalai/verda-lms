@@ -1,0 +1,106 @@
+{
+  "nav": {
+    "browse": "Browse Courses",
+    "instructors": "Instructors",
+    "pricing": "Pricing",
+    "login": "Log in",
+    "signup": "Sign up",
+    "dashboard": "Dashboard",
+    "studio": "Studio",
+    "search": "Search"
+  },
+  "promo": {
+    "text": "🎉 Welcome offer — Sign up today and get 30% off your first course",
+    "cta": "See offer"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "— SCHOOL OF PRACTICE",
+      "headline": "Learn from experts who",
+      "headlineAccent": "actually do the work",
+      "sub": "High-quality online courses from real practitioners. Learn anywhere, anytime, on any device.",
+      "ctaPrimary": "Start for free",
+      "ctaSecondary": "Browse all courses"
+    },
+    "stats": {
+      "learners": "Learners",
+      "courses": "Courses",
+      "instructors": "Instructors",
+      "completionRate": "Completion Rate"
+    },
+    "featured": {
+      "eyebrow": "— FEATURED COURSES",
+      "title": "Featured Courses",
+      "sub": "Curated by the VERDA team",
+      "more": "See all →"
+    },
+    "categories": {
+      "eyebrow": "— BROWSE BY CATEGORY",
+      "title": "Browse by Category"
+    },
+    "instructors": {
+      "eyebrow": "— OUR INSTRUCTORS",
+      "title": "Taught by real practitioners",
+      "more": "See all instructors →"
+    }
+  },
+  "course": {
+    "enroll": "Enroll now",
+    "addToCart": "Add to cart",
+    "preview": "Preview",
+    "enrolled": "Enrolled",
+    "lessons": "lessons",
+    "students": "students",
+    "rating": "rating",
+    "lastUpdated": "Last updated",
+    "level": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "myCourses": "My Courses",
+    "continueLearn": "Continue learning",
+    "streak": "Day streak",
+    "completed": "Completed",
+    "inProgress": "In progress"
+  },
+  "auth": {
+    "login": {
+      "title": "Log in",
+      "email": "Email",
+      "password": "Password",
+      "remember": "Remember me",
+      "forgot": "Forgot password?",
+      "submit": "Log in",
+      "orWith": "Or log in with"
+    },
+    "signup": {
+      "title": "Create account",
+      "name": "Full name",
+      "email": "Email",
+      "password": "Password",
+      "terms": "I agree to the",
+      "termsLink": "Terms of Service",
+      "submit": "Create account"
+    },
+    "google": "Continue with Google",
+    "line": "Continue with LINE"
+  },
+  "footer": {
+    "tagline": "Learn from experts who actually do the work",
+    "about": "About",
+    "blog": "Blog",
+    "careers": "Careers",
+    "press": "Press",
+    "courses": "All courses",
+    "instructors": "Teach on VERDA",
+    "affiliate": "Affiliate",
+    "help": "Help",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "© 2026 VERDA. All rights reserved."
+  }
+}
