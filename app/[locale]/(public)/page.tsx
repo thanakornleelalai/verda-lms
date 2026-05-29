@@ -19,6 +19,7 @@ import { Avatar } from "@/components/primitives/Avatar";
 import { ScrollReveal } from "@/components/home/ScrollReveal";
 import { StatCounter } from "@/components/home/StatCounter";
 import { PopularCoursesBanner, type BannerCourse } from "@/components/home/PopularCoursesBanner";
+import { TrendingMarquee } from "@/components/home/TrendingMarquee";
 
 import { MOCK_COURSES, MOCK_CATEGORIES, MOCK_INSTRUCTORS, PLATFORM_STATS } from "@/mock";
 import { formatNumber } from "@/lib/utils";
@@ -46,10 +47,10 @@ export default function HomePage() {
       <main>
         <HeroSection />
         <PopularBanner />
+        <TrendingMarquee />
         <StatsSection />
         <TrialSection />
         <FeaturedCoursesSection />
-        <AiDataSection />
         <CategoriesSection />
         <InstructorsSection />
         <CtaBanner />
@@ -424,59 +425,6 @@ function FeaturedCoursesSection() {
 
         <Suspense fallback={<CourseGrid courses={MOCK_COURSES.slice(0, 6)} columns={3} />}>
           <FeaturedCoursesGrid />
-        </Suspense>
-      </Container>
-    </section>
-  );
-}
-
-/* ════════════════════════════════════════════════════════════════════
-   DATA & AI SPOTLIGHT
-   Dedicated section for AI/Data Science courses
-   ════════════════════════════════════════════════════════════════════ */
-async function AiDataCoursesGrid() {
-  const { courses } = await getCourses({ categorySlug: "data", pageSize: 3 });
-  return <CourseGrid courses={courses} columns={3} />;
-}
-
-function AiDataSection() {
-  const aiDataMock = MOCK_COURSES.filter((c) =>
-    c.tags.some((t) => t.toLowerCase() === "data" || t === "AI" || t === "Machine Learning")
-  ).slice(0, 3);
-
-  return (
-    <section className="py-[80px] border-b border-line bg-ink relative overflow-hidden">
-      {/* Background glow */}
-      <div
-        className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full pointer-events-none opacity-[0.07]"
-        style={{ background: "radial-gradient(circle, #7C3AED 0%, transparent 68%)" }}
-      />
-      <div
-        className="absolute bottom-[-25%] left-[-5%] w-[400px] h-[400px] rounded-full pointer-events-none opacity-[0.05]"
-        style={{ background: "radial-gradient(circle, var(--viridian) 0%, transparent 70%)" }}
-      />
-
-      <Container className="relative">
-        <ScrollReveal className="flex items-end justify-between mb-[28px] gap-6">
-          <div>
-            <EyebrowLabel className="mb-2 text-[#5C6863]">— DATA &amp; AI</EyebrowLabel>
-            <DisplayHeading as="h2" className="text-white">
-              เรียนรู้ AI &amp; Data Science
-            </DisplayHeading>
-            <p className="text-[13px] text-[#8A938E] mt-1.5 font-thai">
-              คอร์สยอดนิยมด้าน Machine Learning, Python และ Data Science
-            </p>
-          </div>
-          <Link
-            href="/th/courses?category=data"
-            className="font-mono text-[11px] tracking-[0.1em] uppercase text-viridian-3 hover:text-viridian transition-colors shrink-0 flex items-center gap-1.5"
-          >
-            ดูทั้งหมด <ArrowRight size={11} />
-          </Link>
-        </ScrollReveal>
-
-        <Suspense fallback={<CourseGrid courses={aiDataMock} columns={3} />}>
-          <AiDataCoursesGrid />
         </Suspense>
       </Container>
     </section>
