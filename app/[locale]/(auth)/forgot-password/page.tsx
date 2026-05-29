@@ -3,8 +3,9 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { Mail, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/primitives/Button";
+import { requestPasswordReset } from "@/actions/auth";
 
 export default function ForgotPasswordPage() {
   const locale = useLocale();
@@ -18,13 +19,11 @@ export default function ForgotPasswordPage() {
     if (!email.trim()) return;
     setError("");
     startTransition(async () => {
-      try {
-        // In production: call resetPassword() Server Action → Resend email
-        // For now, simulate success after 800ms
-        await new Promise((r) => setTimeout(r, 800));
+      const result = await requestPasswordReset(email.trim());
+      if (result.success) {
         setSent(true);
-      } catch {
-        setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+      } else {
+        setError(result.error ?? "เกิดข้อผิดพลาด กรุณาลองใหม่");
       }
     });
   }
@@ -45,10 +44,13 @@ export default function ForgotPasswordPage() {
                 <CheckCircle size={32} className="text-ok" />
               </div>
               <h1 className="font-display text-[26px] text-ink mb-3">ตรวจสอบอีเมลของคุณ</h1>
-              <p className="text-[14px] text-ink-3 leading-[1.7] font-thai mb-6">
-                เราส่งลิงก์สำหรับรีเซ็ตรหัสผ่านไปยัง{" "}
-                <span className="font-medium text-ink">{email}</span> แล้ว
-                กรุณาตรวจสอบกล่องข้อความ (รวมถึงโฟลเดอร์ spam)
+              <p className="text-[14px] text-ink-3 leading-[1.7] font-thai mb-2">
+                เราส่งลิงก์รีเซ็ตรหัสผ่านไปยัง
+                <br />
+                <span className="font-medium text-ink">{email}</span>
+              </p>
+              <p className="text-[12px] text-ink-4 mb-6">
+                ลิงก์จะหมดอายุใน 1 ชั่วโมง · ตรวจสอบโฟลเดอร์ Spam ด้วย
               </p>
               <Link href={`/${locale}/login`}>
                 <Button variant="primary" className="w-full justify-center">
@@ -56,7 +58,7 @@ export default function ForgotPasswordPage() {
                 </Button>
               </Link>
               <button
-                onClick={() => { setSent(false); setEmail(""); }}
+                onClick={() => { setSent(false); setEmail(""); setError(""); }}
                 className="mt-4 text-[13px] text-viridian hover:underline block w-full text-center"
               >
                 ลองด้วยอีเมลอื่น
@@ -67,16 +69,18 @@ export default function ForgotPasswordPage() {
               <div className="mb-6">
                 <h1 className="font-display text-[28px] text-ink mb-2">ลืมรหัสผ่าน?</h1>
                 <p className="text-[14px] text-ink-3 font-thai leading-[1.6]">
-                  กรอกอีเมลที่ใช้สมัครสมาชิก เราจะส่งลิงก์สำหรับรีเซ็ตรหัสผ่านให้คุณ
+                  กรอกอีเมลที่ใช้สมัครสมาชิก เราจะส่งลิงก์รีเซ็ตรหัสผ่านให้ทันที
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 {error && (
-                  <p className="text-[13px] text-danger bg-danger/10 border border-danger/20 rounded-r2 px-3 py-2">
+                  <div className="flex items-center gap-2 text-[13px] text-danger bg-danger/5 border border-danger/20 rounded-r2 px-3 py-2">
+                    <AlertCircle size={14} className="shrink-0" />
                     {error}
-                  </p>
+                  </div>
                 )}
+
                 <div>
                   <label className="block text-[13px] font-medium text-ink mb-1.5">
                     อีเมล
@@ -89,7 +93,7 @@ export default function ForgotPasswordPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="w-full border border-line rounded-r2 pl-10 pr-3.5 h-[42px] text-[14px] font-thai bg-paper-3 focus:outline-none focus:border-viridian transition-colors"
+                      className="w-full border border-line rounded-r2 pl-10 pr-3.5 h-[42px] text-[14px] bg-paper focus:outline-none focus:border-viridian transition-colors"
                     />
                   </div>
                 </div>

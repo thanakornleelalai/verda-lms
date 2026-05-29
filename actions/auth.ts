@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { signIn } from "@/lib/auth";
 import { storeOtp, checkOtp, consumeOtp, DEV_OTP } from "@/lib/otp-store";
+import { createToken, verifyAndConsumeToken, tokenKey } from "@/lib/tokens";
+import { sendPasswordResetEmail, sendEmailVerificationEmail, sendWelcomeEmail } from "@/lib/resend";
 
 // ── Phone number helpers ──────────────────────────────────────────────────────
 
@@ -195,4 +197,107 @@ export async function loginWithCredentials(formData: {
   } catch {
     return { error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" };
   }
+}
+
+// ── Password Reset ─────────────────────────────────────────────────────────────
+
+export async function requestPasswordReset(
+  email: string,
+): Promise<{ success: boolean; error?: string }> {
+  if (!email.trim()) return { success: false, error: "กรุณากรอกอีเมล" };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { success: false, error: "รูปแบบอีเมลไม่ถูกต้อง" };
+  }
+
+  try {
+    const user = await db.user.findUnique({ where: { email } });
+    if (!user) {
+      // Don't leak whether email exists — always return success
+      return { success: true };
+    }
+    if (!user.passwordHash) {
+      return { success: false, error: "บัญชีนี้ใช้ Social Login กรุณาเข้าสู่ระบบด้วย Google หรือ LINE" };
+    }
+  } catch {
+    // DB unavailable — proceed (mock mode)
+  }
+
+  try {
+    const token = await createToken(tokenKey.passwordReset(email), 60 * 60 * 1000);
+    await sendPasswordResetEmail(email, token);
+  } catch {
+    return { success: false, error: "ไม่สามารถส่งอีเมลได้ กรุณาลองใหม่" };
+  }
+
+  return { success: true };
+}
+
+export async function resetPassword(
+  token: string,
+  email: string,
+  newPassword: string,
+  confirmPassword: string,
+): Promise<{ success: boolean; error?: string }> {
+  if (!newPassword) return { success: false, error: "กรุณากรอกรหัสผ่านใหม่" };
+  if (newPassword.length < 8) return { success: false, error: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" };
+  if (newPassword !== confirmPassword) return { success: false, error: "รหัสผ่านไม่ตรงกัน" };
+
+  const result = await verifyAndConsumeToken(tokenKey.passwordReset(email), token);
+  if (!result.valid) return { success: false, error: result.error };
+
+  try {
+    const hashed = await bcrypt.hash(newPassword, 12);
+    await db.user.update({ where: { email }, data: { passwordHash: hashed } });
+    return { success: true };
+  } catch {
+    return { success: false, error: "ไม่สามารถรีเซ็ตรหัสผ่านได้ กรุณาลองใหม่" };
+  }
+}
+
+// ── Email Verification ─────────────────────────────────────────────────────────
+
+export async function sendEmailVerification(
+  email: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const token = await createToken(tokenKey.emailVerify(email), 24 * 60 * 60 * 1000);
+    await sendEmailVerificationEmail(email, token);
+    return { success: true };
+  } catch {
+    return { success: false, error: "ไม่สามารถส่งอีเมลได้" };
+  }
+}
+
+export async function verifyEmailToken(
+  token: string,
+  email: string,
+): Promise<{ success: boolean; error?: string }> {
+  const result = await verifyAndConsumeToken(tokenKey.emailVerify(email), token);
+  if (!result.valid) return { success: false, error: result.error };
+
+  try {
+    await db.user.update({
+      where: { email },
+      data: { emailVerified: new Date() },
+    });
+  } catch { /* DB unavailable */ }
+
+  return { success: true };
+}
+
+// ── Register + Welcome email ───────────────────────────────────────────────────
+
+export async function registerUserWithWelcome(formData: {
+  name: string;
+  email: string;
+  password: string;
+}): Promise<{ error?: string }> {
+  const result = await registerUser(formData);
+  if (result.error) return result;
+
+  // Send welcome + verification email (non-blocking)
+  sendWelcomeEmail(formData.email, formData.name).catch(() => {});
+  sendEmailVerification(formData.email).catch(() => {});
+
+  return {};
 }
