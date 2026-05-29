@@ -7,7 +7,7 @@ import { ThemeCustomizer } from "@/components/theme/ThemeCustomizer";
 import { FontSizeControl } from "@/components/home/FontSizeControl";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Avatar } from "@/components/primitives/Avatar";
 import { Button } from "@/components/primitives/Button";
 import { Container } from "./Container";
@@ -16,6 +16,7 @@ export function TopBar() {
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, status } = useSession();
   const [promoVisible, setPromoVisible] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -92,6 +93,13 @@ export function TopBar() {
   async function handleLogout() {
     setMenuOpen(false);
     await signOut({ callbackUrl: `/${locale}` });
+  }
+
+  function handleLocaleSwitch() {
+    const nextLocale = locale === "th" ? "en" : "th";
+    // swap /th/ → /en/ or /en/ → /th/ in current pathname
+    const newPath = pathname.replace(`/${locale}`, `/${nextLocale}`);
+    router.push(newPath);
   }
 
   return (
@@ -190,6 +198,20 @@ export function TopBar() {
 
           {/* Theme & color customizer */}
           <ThemeCustomizer />
+
+          {/* Language switcher */}
+          <button
+            onClick={handleLocaleSwitch}
+            title={locale === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย"}
+            className="h-[38px] px-2.5 rounded-pill border border-line bg-paper-2 hover:border-viridian hover:text-viridian transition-colors flex items-center gap-1.5 text-ink-2"
+          >
+            <span className="font-mono text-[11px] tracking-[0.08em] uppercase font-medium leading-none">
+              {locale === "th" ? "🇹🇭 TH" : "🇺🇸 EN"}
+            </span>
+            <span className="font-mono text-[10px] text-ink-4 leading-none">
+              {locale === "th" ? "/ EN" : "/ TH"}
+            </span>
+          </button>
 
           {/* Cart */}
           <Link
