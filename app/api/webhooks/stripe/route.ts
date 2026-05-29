@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
+import { completeOrder } from "@/actions/payment";
+import { db } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   const payload = await req.text();
@@ -19,13 +21,46 @@ export async function POST(req: NextRequest) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object;
-      const { userId, courseIds } = session.metadata ?? {};
-      // TODO: db.order.update + db.enrollment.createMany
-      console.log("Stripe checkout completed", { userId, courseIds });
+      const { orderId, userId, courseIds } = session.metadata ?? {};
+
+      if (orderId) {
+        // Complete order: PAID + Enrollments + Certificates
+        await completeOrder(orderId);
+
+        // Store gateway reference
+        try {
+          await db.order.update({
+            where: { id: orderId },
+            data: { gatewayRef: session.id, status: "PAID" },
+          });
+        } catch { /* no DB */ }
+
+        console.log("[Stripe] checkout.session.completed", { orderId, userId, courseIds });
+      }
       break;
     }
+
     case "charge.refunded": {
-      // TODO: db.order.update({ status: "REFUNDED" })
+      const charge = event.data.object;
+      const orderId = (charge.metadata as Record<string, string>)?.orderId;
+      if (orderId) {
+        try {
+          await db.order.update({ where: { id: orderId }, data: { status: "REFUNDED" } });
+        } catch { /* no DB */ }
+        console.log("[Stripe] charge.refunded", { orderId });
+      }
+      break;
+    }
+
+    case "payment_intent.payment_failed": {
+      const intent = event.data.object;
+      const orderId = (intent.metadata as Record<string, string>)?.orderId;
+      if (orderId) {
+        try {
+          await db.order.update({ where: { id: orderId }, data: { status: "FAILED" } });
+        } catch { /* no DB */ }
+        console.log("[Stripe] payment_intent.payment_failed", { orderId });
+      }
       break;
     }
   }
