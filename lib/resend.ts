@@ -1,11 +1,17 @@
 import { Resend } from "resend";
 
-export const resend = new Resend(process.env.RESEND_API_KEY);
-
 const FROM = process.env.RESEND_FROM_EMAIL ?? "noreply@verda.co.th";
 const BASE = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
 
-// ── Dev/mock helper ────────────────────────────────────────────────────────────
+// ── Lazy client ──────────────────────────────────────────────────────────────
+// Constructed on first send only — avoids throwing at import time when
+// RESEND_API_KEY is unset (e.g. during build / mock mode).
+
+let _resend: Resend | null = null;
+function getResend(): Resend {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY);
+  return _resend;
+}
 
 function isMock(): boolean {
   return !process.env.RESEND_API_KEY;
@@ -16,7 +22,7 @@ async function send(to: string, subject: string, html: string): Promise<void> {
     console.log(`[Resend Mock] To: ${to} | Subject: ${subject}`);
     return;
   }
-  await resend.emails.send({ from: FROM, to, subject, html });
+  await getResend().emails.send({ from: FROM, to, subject, html });
 }
 
 // ── Base template ──────────────────────────────────────────────────────────────

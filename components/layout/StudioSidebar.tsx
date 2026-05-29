@@ -22,7 +22,7 @@ export function StudioSidebar() {
   const { data: session } = useSession();
 
   return (
-    <aside className="w-[220px] shrink-0 bg-ink min-h-screen flex flex-col sticky top-0">
+    <aside className="w-[220px] shrink-0 bg-ink h-screen flex flex-col sticky top-0">
       <div className="px-6 py-5 border-b border-[#2A332E]">
         <Link href={`/${locale}`} className="flex items-baseline gap-1.5">
           <span className="font-display text-[22px] text-white tracking-[-0.02em]">VERDA</span>
@@ -33,7 +33,7 @@ export function StudioSidebar() {
         </p>
       </div>
 
-      <nav className="flex-1 py-4 px-3">
+      <nav className="flex-1 py-4 px-3 overflow-y-auto">
         {NAV.map(({ href, label, icon: Icon }) => {
           const full = `/${locale}${href}`;
           const active = pathname === full || (href !== "/studio" && pathname.startsWith(full));
@@ -42,9 +42,9 @@ export function StudioSidebar() {
               key={href}
               href={full}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-r2 text-[14px] mb-0.5 transition-colors",
+                "nav-item flex items-center gap-3 px-3 py-2.5 rounded-r2 text-[14px] mb-0.5",
                 active
-                  ? "bg-viridian text-white"
+                  ? "nav-item-active bg-viridian text-white shadow-sm"
                   : "text-[#8A938E] hover:text-white hover:bg-[#1c2421]"
               )}
             >
@@ -63,7 +63,8 @@ export function StudioSidebar() {
           </div>
         )}
         <div className="flex items-center gap-2 px-3 py-1">
-          <ThemeCustomizer />
+          <ThemeCustomizer placement="top-left" />
+          <span className="text-[12px] text-[#8A938E]">ธีม & สี</span>
         </div>
         <Link
           href={`/${locale}`}

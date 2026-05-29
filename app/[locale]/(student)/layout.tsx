@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 export default async function StudentLayout({
   children,
@@ -15,5 +16,5 @@ export default async function StudentLayout({
     redirect(`/${locale}/login`);
   }
 
-  return <>{children}</>;
+  return <PageTransition>{children}</PageTransition>;
 }

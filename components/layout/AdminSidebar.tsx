@@ -29,7 +29,7 @@ export function AdminSidebar() {
   const { data: session } = useSession();
 
   return (
-    <aside className="w-[220px] shrink-0 bg-paper-3 border-r border-line flex flex-col min-h-screen sticky top-0">
+    <aside className="w-[220px] shrink-0 bg-paper-3 border-r border-line flex flex-col h-screen sticky top-0">
       <div className="px-6 py-5 border-b border-line">
         <Link href={`/${locale}`} className="flex items-baseline gap-1.5">
           <span className="font-display text-[20px] text-ink tracking-[-0.02em]">VERDA</span>
@@ -38,7 +38,7 @@ export function AdminSidebar() {
         <p className="font-mono text-[9px] text-ink-3 tracking-[0.12em] uppercase mt-1">ADMIN PANEL</p>
       </div>
 
-      <nav className="flex-1 py-4 px-3">
+      <nav className="flex-1 py-4 px-3 overflow-y-auto">
         {NAV.map(({ href, label, icon: Icon }) => {
           const full = `/${locale}${href}`;
           const active = pathname === full || (href !== "/admin" && pathname.startsWith(full));
@@ -47,8 +47,8 @@ export function AdminSidebar() {
               key={href}
               href={full}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-r2 text-[14px] mb-0.5 transition-colors",
-                active ? "bg-viridian text-white" : "text-ink-2 hover:bg-paper-2 hover:text-ink"
+                "nav-item flex items-center gap-3 px-3 py-2.5 rounded-r2 text-[14px] mb-0.5",
+                active ? "nav-item-active bg-viridian text-white shadow-sm" : "text-ink-2 hover:bg-paper-2 hover:text-ink"
               )}
             >
               <Icon size={16} />
@@ -66,7 +66,8 @@ export function AdminSidebar() {
           </div>
         )}
         <div className="flex items-center gap-2 px-3 py-1">
-          <ThemeCustomizer />
+          <ThemeCustomizer placement="top-left" />
+          <span className="text-[12px] text-ink-3">ธีม & สี</span>
         </div>
         <Link
           href={`/${locale}`}

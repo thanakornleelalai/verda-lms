@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { StudioSidebar } from "@/components/layout/StudioSidebar";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 export default async function StudioLayout({
   children,
@@ -24,7 +25,9 @@ export default async function StudioLayout({
   return (
     <div className="min-h-screen bg-paper flex">
       <StudioSidebar />
-      <div className="flex-1 overflow-auto">{children}</div>
+      <div className="flex-1 overflow-auto">
+        <PageTransition>{children}</PageTransition>
+      </div>
     </div>
   );
 }

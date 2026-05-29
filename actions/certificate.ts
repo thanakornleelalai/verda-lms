@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { MOCK_COURSES } from "@/mock";
+import { getCertVerifyUrl } from "@/lib/certificate-url";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -289,18 +290,6 @@ export async function getAllCertificates(filters?: { courseId?: string; search?:
       },
     ];
   }
-}
-
-// ── QR Code URL helper ─────────────────────────────────────────────────────────
-
-export function getCertVerifyUrl(certId: string, locale = "th"): string {
-  const base = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-  return `${base}/${locale}/certificate/verify/${certId}`;
-}
-
-export function getCertQRCodeUrl(certId: string, size = 160): string {
-  const verifyUrl = getCertVerifyUrl(certId);
-  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(verifyUrl)}&color=1A2320&bgcolor=ffffff&margin=6`;
 }
 
 // ── Email helper (stub) ────────────────────────────────────────────────────────

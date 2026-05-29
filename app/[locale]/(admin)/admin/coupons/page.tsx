@@ -152,7 +152,7 @@ export default function AdminCouponsPage() {
       )}
 
       {/* Coupon list */}
-      <div className="bg-paper-3 border border-line rounded-r3 overflow-hidden">
+      <div className="stat-tile bg-paper-3 border border-line rounded-r3 overflow-hidden">
         <table className="w-full text-[14px]">
           <thead>
             <tr className="border-b border-line bg-paper-2">

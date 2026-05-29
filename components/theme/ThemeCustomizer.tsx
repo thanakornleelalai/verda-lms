@@ -26,9 +26,18 @@ const COLOR_CATALOG: ColorConfig[] = [
 
 // ── Component ─────────────────────────────────────────────────────────────
 
-export function ThemeCustomizer() {
+// "bottom-right" — opens below, right-aligned (TopBar default)
+// "top-left"     — opens above, left-aligned (narrow sidebars; avoids off-screen overflow)
+type Placement = "bottom-right" | "top-left";
+
+export function ThemeCustomizer({ placement = "bottom-right" }: { placement?: Placement }) {
   const { tone, color, setTone, setColor } = useTheme();
   const [open, setOpen] = useState(false);
+
+  const panelPos =
+    placement === "top-left"
+      ? "left-0 bottom-[calc(100%+10px)]"
+      : "right-0 top-[calc(100%+10px)]";
 
   const isDark     = tone === "dark";
   const panelRef   = useRef<HTMLDivElement>(null);
@@ -83,7 +92,7 @@ export function ThemeCustomizer() {
           ref={panelRef}
           role="dialog"
           aria-label="ตัวปรับแต่ง Theme และสี"
-          className="absolute right-0 top-[calc(100%+10px)] z-50 w-[264px] bg-paper-3 border border-line rounded-r3 shadow-lg overflow-hidden"
+          className={`absolute ${panelPos} z-50 w-[264px] bg-paper-3 border border-line rounded-r3 shadow-lg overflow-hidden anim-scale-in`}
         >
           {/* Viridian accent bar — updates automatically when color changes */}
           <div className="h-[3px] bg-viridian" />

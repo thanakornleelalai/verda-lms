@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyCertificate, getCertVerifyUrl } from "@/actions/certificate";
+import { verifyCertificate } from "@/actions/certificate";
+import { getCertVerifyUrl } from "@/lib/certificate-url";
 
 function buildPrintableHtml(certId: string, data: {
   studentName: string;

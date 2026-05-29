@@ -33,14 +33,14 @@ export default async function AdminAnalyticsPage({
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 stagger">
         {[
           { label: "รายได้รวม (6 เดือน)", value: formatPrice(totalMonthlyRevenue * 100, "THB"), sub: `เฉลี่ย ${formatPrice(avgMonthlyRevenue * 100, "THB")}/เดือน`, icon: TrendingUp, color: "text-viridian" },
           { label: "ผู้ใช้ทั้งหมด", value: formatNumber(data.totalUsers), sub: `${formatNumber(data.monthlyData.at(-1)?.newUsers ?? 0)} ใหม่เดือนนี้`, icon: Users, color: "text-blue-500" },
           { label: "คำสั่งซื้อ", value: formatNumber(data.totalOrders), sub: `${formatNumber(data.monthlyData.at(-1)?.orders ?? 0)} เดือนนี้`, icon: ShoppingBag, color: "text-amber-500" },
           { label: "คอร์ส Published", value: formatNumber(data.totalCourses), sub: "active", icon: BookOpen, color: "text-ok" },
         ].map(({ label, value, sub, icon: Icon, color }) => (
-          <div key={label} className="bg-paper-3 border border-line rounded-r3 p-5">
+          <div key={label} className="stat-tile bg-paper-3 border border-line rounded-r3 p-5">
             <div className="flex items-start justify-between mb-3">
               <p className="text-[12px] text-ink-3 font-thai">{label}</p>
               <div className="w-8 h-8 rounded-r2 bg-paper-2 flex items-center justify-center">

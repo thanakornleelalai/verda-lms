@@ -9,11 +9,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: Size;
 }
 
+// `btn-depth` adds dimensional press feedback (lift on hover, press on active).
+// Ghost stays flat (no depth) to read as a secondary action.
 const variantClass: Record<Variant, string> = {
-  primary: "bg-viridian text-[#F5F0E1] hover:bg-viridian-2",
+  primary: "bg-viridian text-[#F5F0E1] hover:bg-viridian-2 btn-depth",
   ghost:   "bg-transparent text-ink border border-line hover:bg-paper-2 hover:border-ink-4",
-  quiet:   "bg-paper-2 text-ink hover:bg-line-2",
-  dark:    "bg-ink text-[#F5F0E1] hover:bg-ink-2",
+  quiet:   "bg-paper-2 text-ink hover:bg-line-2 btn-depth",
+  dark:    "bg-ink text-[#F5F0E1] hover:bg-ink-2 btn-depth",
 };
 
 const sizeClass: Record<Size, string> = {
@@ -27,8 +29,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     <button
       ref={ref}
       className={cn(
-        "inline-flex items-center gap-2 rounded-pill font-thai font-medium",
-        "transition-all duration-150 ease-in whitespace-nowrap border border-transparent",
+        "inline-flex items-center justify-center gap-2 rounded-pill font-thai font-medium",
+        "transition-all duration-150 whitespace-nowrap border border-transparent",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-viridian focus-visible:ring-offset-2 focus-visible:ring-offset-paper",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         variantClass[variant],
         sizeClass[size],
