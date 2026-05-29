@@ -2,7 +2,7 @@
 
 > **Platform:** Online Course Marketplace (Thai / English)
 > **Stack:** Next.js 15 · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Vercel
-> **Last updated:** 2026-05-30 (Session 21 — Modern typography (site-wide) + extended unit tests: 37 passing across 3 files)
+> **Last updated:** 2026-05-30 (Session 22 — Tenant provisioning admin page (/admin/tenants) · all checks green: 37 tests, lint, tsc, build)
 > **Version:** 1.0.0
 
 ---
@@ -952,9 +952,9 @@ RESEND_API_KEY=re_...
 | 12.1 | Tenant lookup in Edge Middleware — KV cache 300s | ⏳ | 🟡 Medium | Inject `x-tenant-id` header |
 | 12.2 | TenantSettings applied to TopBar logo + primary color | ⏳ | 🟡 Medium | CSS custom property override |
 | 12.3 | PostgreSQL RLS policy — `app.tenant_id` session variable | ⏳ | 🟡 Medium | All queries auto-scoped |
-| 12.4 | Tenant provisioning form (superadmin panel) | ⏳ | 🟢 Low | `tenants/new` page |
+| 12.4 | Tenant provisioning form (superadmin panel) — `/admin/tenants` | ✅ | 🟢 Low | `tenants/new` page |
 | 12.5 | Custom domain setup UI + DNS verification | ⏳ | 🟢 Low | `TenantDomain.verified` flow |
-| 12.6 | Revenue share config per tenant | ⏳ | 🟢 Low | `TenantSettings.revenueShare` |
+| 12.6 | Revenue share config per tenant (% field in tenant form) | ✅ | 🟢 Low | `TenantSettings.revenueShare` |
 
 ---
 
@@ -1346,6 +1346,20 @@ S5 Track Progress          █████████████████�
 
 ---
 
+## Phase 23 — Tenant Provisioning (Session 22 — 2026-05-30)
+
+> Advanced Admin → multi-tenant management (Phase 12.4 + 12.6)
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 23.1 | Tenant Server Actions (get/create/delete) | ✅ | `actions/admin.ts` | in-memory store + DB fallback, admin guard |
+| 23.2 | Admin Tenants page — provisioning form + table | ✅ | `admin/tenants/TenantManager.tsx` + `page.tsx` | name/slug/domain/plan/revenue-share |
+| 23.3 | Revenue share % config per tenant | ✅ | — | stored in tenant settings |
+| 23.4 | AdminSidebar — Tenants nav item | ✅ | `components/layout/AdminSidebar.tsx` | Building2 icon |
+| 23.5 | Protect default tenant from deletion | ✅ | — | `tnt_001` cannot be deleted |
+
+---
+
 ## Success KPIs (from PRD)
 
 Track these after launch:
@@ -1390,6 +1404,7 @@ v1.1 (Month 6+)
 5. Update "Last updated" date at the top of this file
 
 > **Tip:** Use `Ctrl+F` to search for `🔄` to find what's currently in progress.
+
 
 
 

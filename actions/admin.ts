@@ -323,3 +323,77 @@ export async function bulkUpdateUserRole(
     return { success: false, error: "ไม่สามารถอัปเดตบทบาทได้" };
   }
 }
+
+// ── Tenant Provisioning (multi-tenant / white-label) ───────────────────────────
+
+export interface Tenant {
+  id: string;
+  slug: string;
+  name: string;
+  domain: string | null;
+  plan: string;        // starter / business / enterprise
+  revenueShare: number; // % that goes to the tenant
+  createdAt: string;
+}
+
+// In-memory store (mirrors announcements pattern; swap for db.tenant when DB is live)
+const tenantStore: Tenant[] = [
+  { id: "tnt_001", slug: "verda", name: "VERDA (default)", domain: "verda.co.th", plan: "enterprise", revenueShare: 70, createdAt: new Date("2026-01-01").toISOString() },
+  { id: "tnt_002", slug: "pim-academy", name: "PIM Academy", domain: "learn.pim.ac.th", plan: "business", revenueShare: 60, createdAt: new Date("2026-04-20").toISOString() },
+];
+
+export async function getTenants(): Promise<Tenant[]> {
+  try {
+    const rows = await db.tenant.findMany({ orderBy: { name: "asc" } });
+    if (rows.length > 0) {
+      return rows.map((t) => ({
+        id: t.id, slug: t.slug, name: t.name, domain: t.domain, plan: t.plan,
+        revenueShare: ((t.settings as { revenueShare?: number } | null)?.revenueShare) ?? 70,
+        createdAt: new Date().toISOString(),
+      }));
+    }
+  } catch { /* fall through to mock */ }
+  return [...tenantStore];
+}
+
+export async function createTenant(data: {
+  name: string;
+  slug: string;
+  domain?: string;
+  plan: string;
+  revenueShare: number;
+}): Promise<ActionResult> {
+  if (!await requireAdmin()) return { success: false, error: "Unauthorized" };
+  const slug = data.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-");
+  if (!data.name.trim()) return { success: false, error: "กรุณากรอกชื่อองค์กร" };
+  if (!slug) return { success: false, error: "กรุณากรอก slug" };
+  if (data.revenueShare < 0 || data.revenueShare > 100) return { success: false, error: "ส่วนแบ่งรายได้ต้อง 0-100%" };
+  if (tenantStore.some((t) => t.slug === slug)) return { success: false, error: "slug นี้ถูกใช้แล้ว" };
+
+  try {
+    await db.tenant.create({
+      data: { name: data.name.trim(), slug, domain: data.domain?.trim() || null, plan: data.plan, settings: { revenueShare: data.revenueShare } },
+    });
+  } catch {
+    tenantStore.push({
+      id: `tnt_${Date.now().toString(36)}`,
+      slug, name: data.name.trim(), domain: data.domain?.trim() || null,
+      plan: data.plan, revenueShare: data.revenueShare, createdAt: new Date().toISOString(),
+    });
+  }
+  revalidatePath("/admin/tenants");
+  return { success: true };
+}
+
+export async function deleteTenant(id: string): Promise<ActionResult> {
+  if (!await requireAdmin()) return { success: false, error: "Unauthorized" };
+  if (id === "tnt_001") return { success: false, error: "ไม่สามารถลบ tenant หลักได้" };
+  try {
+    await db.tenant.delete({ where: { id } });
+  } catch {
+    const idx = tenantStore.findIndex((t) => t.id === id);
+    if (idx >= 0) tenantStore.splice(idx, 1);
+  }
+  revalidatePath("/admin/tenants");
+  return { success: true };
+}

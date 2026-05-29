@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
-import { LayoutDashboard, Users, BookOpen, ShoppingBag, Settings, LogOut, ExternalLink, Award, TrendingUp, Tag, Bell, Shield, Server, FileText } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, ShoppingBag, Settings, LogOut, ExternalLink, Award, TrendingUp, Tag, Bell, Shield, Server, FileText, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSession, signOut } from "next-auth/react";
 import { ThemeCustomizer } from "@/components/theme/ThemeCustomizer";
@@ -19,6 +19,7 @@ const NAV = [
   { href: "/admin/announcements", label: "Announcements", icon: Bell },
   { href: "/admin/content", label: "Content", icon: FileText },
   { href: "/admin/moderation", label: "Moderation", icon: Shield },
+  { href: "/admin/tenants", label: "Tenants", icon: Building2 },
   { href: "/admin/system", label: "System", icon: Server },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
