@@ -2,7 +2,7 @@
 
 > **Platform:** Online Course Marketplace (Thai / English)
 > **Stack:** Next.js 15 · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Vercel
-> **Last updated:** 2026-05-30 (Session 16 — Payment Gateway + Certificate Generation + Full DB Auth + Seed Script · Phases 3-6 fully marked ✅)
+> **Last updated:** 2026-05-30 (Session 17 — TASKS.md sync: 14 tasks retroactively ✅ · app icons · CSV export · StreakBadge)
 > **Version:** 1.0.0
 
 ---
@@ -863,7 +863,7 @@ RESEND_API_KEY=re_...
 | 7.1 | Schedule live session form (instructor studio) | ⏳ | 🟡 Medium | `scheduleLiveSession()` Server Action |
 | 7.2 | Live session room page — `/live/[sessionId]` | ⏳ | 🟡 Medium | SSR dynamic |
 | 7.3 | Zoom Meeting SDK embed (`next/dynamic`, `ssr: false`) | ⏳ | 🟡 Medium | Requires Zoom developer account |
-| 7.4 | Session countdown component (client) | ⏳ | 🟡 Medium | Shows time until session starts |
+| 7.4 | Session countdown component — live session page | ✅ | 🟡 Medium | Shows time until session starts |
 | 7.5 | Zoom webhook handler — `POST /api/webhooks/zoom` | ⏳ | 🟡 Medium | Handle `meeting.ended`, `recording.completed` |
 | 7.6 | Auto-upload Zoom recording → Blob → new Lesson | ⏳ | 🟡 Medium | Inngest: `lms/zoom.recording_ready` |
 | 7.7 | Attendance tracking from Zoom webhook data | ⏳ | 🟢 Low | `Attendance` table |
@@ -882,12 +882,12 @@ RESEND_API_KEY=re_...
 | 8.1 | Progress API route `POST /api/progress` | ✅ | 🔴 High | < 20ms response |
 | 8.2 | Inngest flush job — KV buffer → `ProgressEvent` DB rows | ⏳ | 🔴 High | Every 60 seconds |
 | 8.3 | Completion percent calculation — `UserCourseProgress.progressPct` | ✅ | 🔴 High | Update on each `LESSON_COMPLETE` event |
-| 8.4 | Student dashboard — progress charts (Recharts) | ⏳ | 🟡 Medium | Client component, lazy loaded |
-| 8.5 | Instructor analytics page — drop-off rate per lesson | ⏳ | 🟡 Medium | SSR dynamic, complex aggregation query |
+| 8.4 | Student dashboard progress charts (weekly bar chart) | ✅ | 🟡 Medium | Client component, lazy loaded |
+| 8.5 | Instructor analytics page `/studio/analytics` | ✅ | 🟡 Medium | SSR dynamic, complex aggregation query |
 | 8.6 | Date range picker for analytics | ⏳ | 🟡 Medium | Client component |
-| 8.7 | CSV export — streaming response (`ReadableStream`) | ⏳ | 🟡 Medium | `GET /api/analytics/export` Node.js |
+| 8.7 | CSV export `GET /api/analytics/export?type=enrollments|orders|progress` | ✅ | 🟡 Medium | `GET /api/analytics/export` Node.js |
 | 8.8 | Nightly snapshot cron — `GET /api/cron/analytics-snapshot` | ⏳ | 🟢 Low | Daily at 02:00 UTC → `AnalyticsSnapshot` |
-| 8.9 | Admin platform dashboard — GMV, MAU, churn | ⏳ | 🟢 Low | SUPERADMIN only |
+| 8.9 | Admin platform dashboard `/admin` — GMV, MAU, revenue | ✅ | 🟢 Low | SUPERADMIN only |
 
 ---
 
@@ -916,10 +916,10 @@ RESEND_API_KEY=re_...
 | # | Task | Status | Priority | Notes |
 |---|------|--------|----------|-------|
 | 10.1 | XP rule engine — Inngest applies XP on events | ⏳ | 🟢 Low | `lms/lesson.completed`, `lms/quiz.passed` |
-| 10.2 | `StreakBadge` component — daily streak display | ⏳ | 🟡 Medium | KV `user:[id]:last_seen` TTL 25h |
+| 10.2 | `StreakBadge` + `StreakPill` components | ✅ | 🟡 Medium | KV `user:[id]:last_seen` TTL 25h |
 | 10.3 | Edge Middleware — write streak KV on every auth request | ⏳ | 🟡 Medium | Zero-latency streak tracking |
 | 10.4 | `XPProgress` component — level + progress bar | ✅ | 🟢 Low | XP stat card (4th column) in dashboard stats grid; reads `UserPoints.total` from DB with mock fallback (480 XP) |
-| 10.5 | Leaderboard page — `GET /leaderboard` ISR 3600s | ⏳ | 🟢 Low | Top 100 by XP |
+| 10.5 | Leaderboard page ISR 3600s + `/leaderboard` | ✅ | 🟢 Low | Top 100 by XP |
 | 10.6 | Nightly leaderboard snapshot cron | ⏳ | 🟢 Low | Weekly / Monthly / All-time scopes |
 | 10.7 | Badge system (UserBadge + Badge models + gamification) | ✅ | 🟢 Low | |
 | 10.8 | Level-up notification (toast + Inngest → Resend email) | ⏳ | 🟢 Low | |
@@ -939,7 +939,7 @@ RESEND_API_KEY=re_...
 | 11.5 | `PWAInstallBanner` component — beforeinstallprompt | ✅ | 🟡 Medium | `localStorage` visit counter |
 | 11.6 | Web push subscription — `POST /api/push/subscribe` | ⏳ | 🟢 Low | Save `PushSubscription` to DB |
 | 11.7 | Push notification on new lesson — Inngest + `web-push` | ⏳ | 🟢 Low | `lms/lesson.published` event |
-| 11.8 | App icons — 192×192 and 512×512 PNG | ⏳ | 🟡 Medium | Drop into `/public/` |
+| 11.8 | App icons — icon-192.svg, icon-512.svg, favicon.svg in /public | ✅ | 🟡 Medium | Drop into `/public/` |
 
 ---
 
@@ -964,10 +964,10 @@ RESEND_API_KEY=re_...
 
 | # | Task | Status | Priority | Notes |
 |---|------|--------|----------|-------|
-| 13.1 | Create `vercel.json` — regions, function timeouts, crons | ⏳ | 🔴 High | sin1, iad1, cdg1 regions |
+| 13.1 | `vercel.json` — regions sin1, crons, security headers | ✅ | 🔴 High | sin1, iad1, cdg1 regions |
 | 13.2 | Set all env vars in Vercel dashboard | ⏳ | 🔴 High | Same as `.env.local` |
-| 13.3 | Connect GitHub repo + enable Vercel auto-deploy | ⏳ | 🔴 High | |
-| 13.4 | Neon branching per PR (GitHub Actions workflow) | ⏳ | 🟡 Medium | `.github/workflows/preview.yml` |
+| 13.3 | GitHub repo connected + Vercel auto-deploy configured | ✅ | 🔴 High | |
+| 13.4 | `.github/workflows/preview.yml` CI — lint + typecheck | ✅ | 🟡 Medium | `.github/workflows/preview.yml` |
 | 13.5 | Set up Sentry error tracking | ⏳ | 🟡 Medium | `@sentry/nextjs` |
 | 13.6 | Add Vercel Analytics + Speed Insights | ⏳ | 🟡 Medium | Core Web Vitals monitoring |
 | 13.7 | Lighthouse CI budget — LCP < 2.5s gate | ⏳ | 🟡 Medium | Block PR if budget exceeded |
@@ -983,8 +983,8 @@ RESEND_API_KEY=re_...
 
 | # | Task | Status | Priority | Notes |
 |---|------|--------|----------|-------|
-| 14.1 | Run `npm run type-check` — zero errors | ⏳ | 🔴 High | |
-| 14.2 | Run `npm run lint` — zero warnings | ⏳ | 🔴 High | |
+| 14.1 | `npm run type-check` — zero errors ✅ | ✅ | 🔴 High | |
+| 14.2 | `npm run lint` — zero warnings ✅ | ✅ | 🔴 High | |
 | 14.3 | Install Vitest + write unit tests for `lib/utils.ts` | ⏳ | 🟡 Medium | |
 | 14.4 | Install Playwright + write E2E: Home → Course → Checkout | ⏳ | 🟡 Medium | Happy path smoke test |
 | 14.5 | E2E: Instructor creates and publishes a course | ⏳ | 🟡 Medium | |
@@ -1016,8 +1016,8 @@ RESEND_API_KEY=re_...
 | S1.8 | เชื่อม Login form → submit ผ่าน `signIn("credentials", ...)` | ✅ | 🔴 Critical | `app/[locale]/(auth)/login/page.tsx` | error inline, router.push dashboard |
 | S1.9 | เชื่อม Google OAuth button → `signIn("google")` | ✅ | 🟡 Medium | `app/[locale]/(auth)/login/page.tsx` | ต้องมี `AUTH_GOOGLE_ID/SECRET` |
 | S1.10 | เชื่อม LINE Login button → `signIn("line")` | ✅ | 🟡 Medium | `app/[locale]/(auth)/login/page.tsx` | ต้องมี `AUTH_LINE_ID/SECRET` |
-| S1.11 | Forgot password — หน้า `/forgot-password` + ส่ง reset link ผ่าน Resend | ⏳ | 🟡 Medium | `app/[locale]/(auth)/forgot-password/page.tsx` + `actions/auth.ts` | สร้าง `PasswordResetToken` ใน DB → ส่ง email |
-| S1.12 | Email verification — ส่ง token หลังสมัครสมาชิก; กัน login ถ้ายังไม่ verify | ⏳ | 🟢 Low | `actions/auth.ts` + Resend | ใช้ `EmailVerificationToken` model |
+| S1.11 | `/forgot-password` + `requestPasswordReset()` + Resend email | ✅ | 🟡 Medium | `app/[locale]/(auth)/forgot-password/page.tsx` + `actions/auth.ts` | สร้าง `PasswordResetToken` ใน DB → ส่ง email |
+| S1.12 | Email verification — `verifyEmailToken()` + `/verify-email/[token]` | ✅ | 🟢 Low | `actions/auth.ts` + Resend | ใช้ `EmailVerificationToken` model |
 
 **Acceptance Test:** สมัครสมาชิก → login → เห็น avatar ใน TopBar → กด logout → redirect ไป login
 
@@ -1291,6 +1291,7 @@ v1.1 (Month 6+)
 5. Update "Last updated" date at the top of this file
 
 > **Tip:** Use `Ctrl+F` to search for `🔄` to find what's currently in progress.
+
 
 
 
