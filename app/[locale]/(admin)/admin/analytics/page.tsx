@@ -47,7 +47,7 @@ export default async function AdminAnalyticsPage({
                 <Icon size={15} className={color} />
               </div>
             </div>
-            <p className="font-display text-[26px] text-ink leading-none mb-1">{value}</p>
+            <p className="font-display text-[26px] text-ink leading-none mb-1 tabular">{value}</p>
             <p className="text-[11px] text-ink-4">{sub}</p>
           </div>
         ))}

@@ -234,10 +234,15 @@ body {
   color: var(--ink);
   font-family: var(--f-thai);
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.005em;
+  /* Thai script reads better at neutral tracking — negative tracking
+     crowds tone marks & vowels. Latin crispness comes from OpenType below. */
+  letter-spacing: 0;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  font-variant-ligatures: common-ligatures contextual;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -256,6 +261,7 @@ img { display: block; max-width: 100%; }
     font-weight: 400;
     letter-spacing: -0.015em;
     line-height: 1.04;
+    text-wrap: balance;
   }
 
   .eyebrow {
@@ -265,7 +271,23 @@ img { display: block; max-width: 100%; }
     text-transform: uppercase;
     color: var(--ink-3);
   }
+
+  /* Modern wrapping — headings avoid orphan words, paragraphs avoid ragged ends */
+  .text-balance { text-wrap: balance; }
+  .text-pretty  { text-wrap: pretty; }
+
+  /* Aligned figures for prices, stats, tables, timers */
+  .tabular { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+  /* Slightly looser leading for long-form Thai reading blocks */
+  .read-thai { line-height: 1.85; letter-spacing: 0; }
 }
+
+/* Display headings auto-balance wrapping (Instrument Serif) */
+.font-display { text-wrap: balance; }
+
+/* Monospace data is naturally tabular — lock it in for alignment */
+.font-mono { font-variant-numeric: tabular-nums; }
 
 /* ── Placeholder image stripes ─────────────────────────────────────── */
 @layer components {
