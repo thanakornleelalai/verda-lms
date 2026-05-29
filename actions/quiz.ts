@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { maybeCertifyOnQuizPass } from "@/actions/certificate";
 
 const MAX_ATTEMPTS = 3;
 
@@ -87,6 +88,17 @@ export async function finalizeAttempt(
       where: { id: attemptId },
       data: { answers, score, passed, submittedAt: new Date() },
     });
+
+    // Auto-issue certificate when all quizzes in the course are passed
+    if (passed) {
+      const lesson = await db.lesson.findFirst({
+        where: { quizzes: { some: { id: attempt.quizId } } },
+        select: { section: { select: { courseId: true } } },
+      });
+      if (lesson?.section?.courseId) {
+        maybeCertifyOnQuizPass(attempt.userId, lesson.section.courseId).catch(() => {});
+      }
+    }
 
     return { score, passed };
   } catch {

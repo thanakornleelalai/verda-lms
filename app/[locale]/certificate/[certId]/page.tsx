@@ -8,6 +8,7 @@ import { Avatar } from "@/components/primitives/Avatar";
 import { CertificateShareButtons } from "@/components/certificate/CertificateShareButtons";
 import { CertificateQRCode } from "@/components/certificate/CertificateQRCode";
 import { PrintButton } from "@/components/certificate/PrintButton";
+import { auth } from "@/lib/auth";
 
 export const revalidate = 86400;
 
@@ -25,7 +26,8 @@ interface CertData {
   courseSlug: string;
 }
 
-async function getCert(certId: string): Promise<CertData | null> {
+async function getCert(certId: string, sessionName?: string | null): Promise<CertData | null> {
+  // ── Try live DB first ──────────────────────────────────────────────────────
   try {
     const { db } = await import("@/lib/db");
     const row = await db.certificate.findUnique({
@@ -34,7 +36,9 @@ async function getCert(certId: string): Promise<CertData | null> {
         user: { select: { name: true } },
         course: {
           select: {
-            slug: true, title: true, totalDuration: true,
+            slug: true,
+            title: true,
+            totalDuration: true,
             instructor: { select: { name: true } },
           },
         },
@@ -43,7 +47,7 @@ async function getCert(certId: string): Promise<CertData | null> {
     if (row) {
       return {
         id: row.id,
-        studentName: row.user.name ?? "ผู้เรียน",
+        studentName: row.user.name ?? sessionName ?? "ผู้เรียน",
         courseTitle: row.course.title,
         instructorName: row.course.instructor?.name ?? "ผู้สอน",
         issuedAt: row.issuedAt,
@@ -51,12 +55,15 @@ async function getCert(certId: string): Promise<CertData | null> {
         courseSlug: row.course.slug,
       };
     }
-  } catch { /* fall through */ }
+  } catch {
+    // DB unavailable — fall through to mock
+  }
 
-  const MOCK: Record<string, CertData> = {
+  // ── Mock fallback — use session user name ──────────────────────────────────
+  const studentName = sessionName ?? "ผู้เรียน";
+
+  const MOCK: Record<string, Omit<CertData, "id" | "studentName">> = {
     cert_fp_001: {
-      id: "cert_fp_001",
-      studentName: "วีรวัฒน์ ใจดี",
       courseTitle: "Financial Planning for Freelancers",
       instructorName: "ธนพล สิทธิกุล",
       issuedAt: new Date("2026-01-10"),
@@ -64,21 +71,52 @@ async function getCert(certId: string): Promise<CertData | null> {
       courseSlug: "financial-planning-for-freelancers",
     },
     cert_ux_001: {
-      id: "cert_ux_001",
-      studentName: "วีรวัฒน์ ใจดี",
       courseTitle: "UX Design & Figma Masterclass",
       instructorName: "พิมพ์ชนก วัฒนากร",
       issuedAt: new Date("2026-03-20"),
       hours: 8,
       courseSlug: "ux-design-figma-masterclass",
     },
+    cert_ml_001: {
+      courseTitle: "Machine Learning Specialization",
+      instructorName: "Andrew Ng",
+      issuedAt: new Date("2026-04-15"),
+      hours: 12,
+      courseSlug: "machine-learning-specialization",
+    },
+    cert_nx_001: {
+      courseTitle: "Next.js 15 Fullstack Bootcamp",
+      instructorName: "ธนกร ดิจิทัล",
+      issuedAt: new Date("2026-05-01"),
+      hours: 10,
+      courseSlug: "nextjs-15-fullstack-bootcamp",
+    },
   };
-  return MOCK[certId] ?? null;
+
+  const data = MOCK[certId];
+  if (data) return { id: certId, studentName, ...data };
+
+  // Unknown certId — try to parse slug from ID pattern cert_{slug}_xxx
+  const slugMatch = certId.match(/^cert_(.+)_\d+$/);
+  if (slugMatch) {
+    return {
+      id: certId,
+      studentName,
+      courseTitle: slugMatch[1].replace(/-/g, " "),
+      instructorName: "ผู้สอน",
+      issuedAt: new Date(),
+      hours: 0,
+      courseSlug: slugMatch[1],
+    };
+  }
+
+  return null;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { certId } = await params;
-  const cert = await getCert(certId);
+  const session = await auth();
+  const cert = await getCert(certId, session?.user?.name);
   if (!cert) return { title: "ไม่พบใบประกาศ | VERDA" };
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
@@ -97,7 +135,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CertificatePage({ params }: Props) {
   const { certId, locale } = await params;
-  const cert = await getCert(certId);
+  const session = await auth();
+  const cert = await getCert(certId, session?.user?.name);
   if (!cert) notFound();
 
   const issuedFormatted = cert.issuedAt.toLocaleDateString("th-TH", {
@@ -120,7 +159,7 @@ export default async function CertificatePage({ params }: Props) {
           <Link href={`/api/certificate/${certId}/download`}>
             <Button variant="ghost" size="sm" className="flex items-center gap-1.5">
               <Download size={14} />
-              ดาวน์โหลด HTML
+              ดาวน์โหลด
             </Button>
           </Link>
           <PrintButton />
@@ -182,7 +221,7 @@ export default async function CertificatePage({ params }: Props) {
             </div>
           </div>
 
-          {/* ── Bottom row: QR + Cert ID + Verification ── */}
+          {/* Bottom row: QR + Cert ID + Seal */}
           <div className="mt-10 pt-6 border-t border-line flex items-end justify-between gap-6">
             {/* QR Code */}
             <div className="flex flex-col items-center gap-1">
@@ -192,7 +231,7 @@ export default async function CertificatePage({ params }: Props) {
               </p>
             </div>
 
-            {/* Center — Cert ID + verified badge */}
+            {/* Center: Cert ID + Verified badge */}
             <div className="flex-1 text-center">
               <p className="font-mono text-[10px] text-ink-4 tracking-[0.06em] uppercase mb-2">
                 CERTIFICATE ID
@@ -208,7 +247,7 @@ export default async function CertificatePage({ params }: Props) {
               </div>
             </div>
 
-            {/* VERDA seal placeholder */}
+            {/* VERDA Seal */}
             <div className="w-[90px] h-[90px] rounded-full border-2 border-viridian/20 flex items-center justify-center bg-viridian/5 shrink-0">
               <div className="text-center">
                 <p className="font-display text-[14px] text-viridian leading-none">VERDA</p>
