@@ -2,7 +2,7 @@
 
 > **Platform:** Online Course Marketplace (Thai / English)
 > **Stack:** Next.js 15 · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Vercel
-> **Last updated:** 2026-05-30 (Session 18 — Company CMS (Phase 19) + Mux webhook + analytics date-range export · cert/payment tasks retro-marked)
+> **Last updated:** 2026-05-30 (Session 19 — Static/Legal pages (Phase 20): help/privacy/terms/affiliate · zero dead links in footer)
 > **Version:** 1.0.0
 
 ---
@@ -1275,6 +1275,20 @@ S5 Track Progress          █████████████████�
 | 19.2.6 | Public: ร่วมงานกับเรา (`/careers`) | ✅ | `(public)/careers/page.tsx` | job openings + apply mailto |
 | 19.2.7 | Public: สื่อ (`/press`) | ✅ | `(public)/press/page.tsx` | press items + external links |
 | 19.2.8 | Footer COMPANY links now resolve (was 404) | ✅ | — | about/blog/careers/press all live |
+
+---
+
+## Phase 20 — Static / Legal Pages (Session 19 — 2026-05-30)
+
+> Footer SUPPORT + TEACH links — eliminate all remaining dead links
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 20.1 | ศูนย์ช่วยเหลือ (`/help`) | ✅ | `(public)/help/page.tsx` | search bar + 4 categories + 6 FAQ accordion + contact |
+| 20.2 | นโยบายความเป็นส่วนตัว (`/privacy`) | ✅ | `(public)/privacy/page.tsx` | 7 sections, PDPA-compliant |
+| 20.3 | ข้อกำหนดการใช้งาน (`/terms`) | ✅ | `(public)/terms/page.tsx` | 8 sections |
+| 20.4 | โปรแกรมพันธมิตร (`/affiliate`) | ✅ | `(public)/affiliate/page.tsx` | hero + 3 steps + benefits + earnings + CTA |
+| 20.5 | Footer SUPPORT + affiliate links resolve (was 404) | ✅ | — | help/privacy/terms/affiliate all live — **zero dead links in footer** |
 
 ---
 
