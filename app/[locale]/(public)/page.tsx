@@ -18,6 +18,7 @@ import { CourseGrid } from "@/components/course/CourseGrid";
 import { Avatar } from "@/components/primitives/Avatar";
 import { ScrollReveal } from "@/components/home/ScrollReveal";
 import { StatCounter } from "@/components/home/StatCounter";
+import { PopularCoursesBanner, type BannerCourse } from "@/components/home/PopularCoursesBanner";
 
 import { MOCK_COURSES, MOCK_CATEGORIES, MOCK_INSTRUCTORS, PLATFORM_STATS } from "@/mock";
 import { formatNumber } from "@/lib/utils";
@@ -44,6 +45,7 @@ export default function HomePage() {
       <TopBar />
       <main>
         <HeroSection />
+        <PopularBanner />
         <StatsSection />
         <TrialSection />
         <FeaturedCoursesSection />
@@ -55,6 +57,29 @@ export default function HomePage() {
       <Footer />
     </div>
   );
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   POPULAR COURSES BANNER — auto-rotating, dynamic
+   ════════════════════════════════════════════════════════════════════ */
+function PopularBanner() {
+  const top: BannerCourse[] = [...MOCK_COURSES]
+    .sort((a, b) => (b.enrollmentCount ?? 0) - (a.enrollmentCount ?? 0))
+    .slice(0, 5)
+    .map((c) => ({
+      slug: c.slug,
+      title: c.title,
+      instructor: c.instructor?.name ?? "VERDA",
+      rating: c.rating ?? 0,
+      enrollmentCount: c.enrollmentCount ?? 0,
+      price: c.price ?? 0,
+      level: c.level ?? "BEGINNER",
+      tags: c.tags ?? [],
+      art: c.art ?? "linear-gradient(135deg, #0F5D4A 0%, #1A7A60 100%)",
+      monogram: c.monogram ?? c.title.slice(0, 2).toUpperCase(),
+    }));
+
+  return <PopularCoursesBanner courses={top} />;
 }
 
 /* ════════════════════════════════════════════════════════════════════

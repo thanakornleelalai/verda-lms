@@ -529,3 +529,9 @@ img { display: block; max-width: 100%; }
   border-radius: 0 3px 3px 0;
   background: currentColor;
 }
+
+/* Popular-courses banner auto-advance progress bar */
+@keyframes banner-progress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
