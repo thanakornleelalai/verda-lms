@@ -2,7 +2,7 @@
 
 > **Platform:** Online Course Marketplace (Thai / English)
 > **Stack:** Next.js 15 · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Vercel
-> **Last updated:** 2026-05-30 (Session 19 — Static/Legal pages (Phase 20): help/privacy/terms/affiliate · zero dead links in footer)
+> **Last updated:** 2026-05-30 (Session 20 — Dashboard UI polish + Vitest unit tests (22 passing) + 2 build-blocking fixes · `npm run build` now green)
 > **Version:** 1.0.0
 
 ---
@@ -985,7 +985,7 @@ RESEND_API_KEY=re_...
 |---|------|--------|----------|-------|
 | 14.1 | `npm run type-check` — zero errors ✅ | ✅ | 🔴 High | |
 | 14.2 | `npm run lint` — zero warnings ✅ | ✅ | 🔴 High | |
-| 14.3 | Install Vitest + write unit tests for `lib/utils.ts` | ⏳ | 🟡 Medium | |
+| 14.3 | Install Vitest + write unit tests for `lib/utils.ts` (22 tests passing) | ✅ | 🟡 Medium | |
 | 14.4 | Install Playwright + write E2E: Home → Course → Checkout | ⏳ | 🟡 Medium | Happy path smoke test |
 | 14.5 | E2E: Instructor creates and publishes a course | ⏳ | 🟡 Medium | |
 | 14.6 | E2E: Student completes lesson → earns certificate | ⏳ | 🟡 Medium | |
@@ -1292,6 +1292,38 @@ S5 Track Progress          █████████████████�
 
 ---
 
+## Phase 21 — Dashboard UI Polish + Build Hardening (Session 20 — 2026-05-30)
+
+> ปรับสัดส่วน/โมชั่น/มิติของ dashboard ทั้ง admin/instructor/student + แก้ build ให้ deploy ได้
+
+### 21.1 — UI/UX Polish
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 21.1.1 | แก้บั๊ก ThemeCustomizer panel ทะลุจอใน sidebar | ✅ | `components/theme/ThemeCustomizer.tsx` | prop `placement="top-left"` เปิดขึ้นบน+ชิดซ้าย |
+| 21.1.2 | Button depth — เงา/hover-lift/active-press + focus ring | ✅ | `Button.tsx` + `globals.css` | `.btn-depth` |
+| 21.1.3 | `PageTransition` — fade-up ทุกครั้งที่เปลี่ยนหน้า | ✅ | `components/layout/PageTransition.tsx` | ใช้ใน 3 layouts |
+| 21.1.4 | Sidebar nav — active accent + hover slide + scroll-safe | ✅ | `AdminSidebar.tsx`, `StudioSidebar.tsx` | `.nav-item` / `.nav-item-active` |
+| 21.1.5 | Card/KPI depth + stagger entrance | ✅ | `globals.css` | `.stat-tile` `.card-interactive` `.stagger` |
+| 21.1.6 | Motion keyframes + reduced-motion | ✅ | `globals.css` | fade-up/fade-in/scale-in |
+
+### 21.2 — Build Hardening (deploy blockers)
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 21.2.1 | แก้ non-async export ใน `"use server"` | ✅ | `lib/certificate-url.ts` | ย้าย URL helpers ออกจาก actions |
+| 21.2.2 | แก้ `new Resend()` throw ตอน import | ✅ | `lib/resend.ts` | lazy client |
+| 21.2.3 | `npm run build` ผ่านทุก route | ✅ | — | deploy ได้แล้ว |
+
+### 21.3 — Testing (Phase 14.3)
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 21.3.1 | ติดตั้ง Vitest + config + npm scripts | ✅ | `vitest.config.ts`, `package.json` | `npm test` / `test:watch` |
+| 21.3.2 | Unit tests `lib/utils.ts` (22 tests passing) | ✅ | `lib/utils.test.ts` | cn, formatPrice, formatDuration, formatNumber, getInitials, nameToHue |
+
+---
+
 ## Success KPIs (from PRD)
 
 Track these after launch:
@@ -1336,6 +1368,7 @@ v1.1 (Month 6+)
 5. Update "Last updated" date at the top of this file
 
 > **Tip:** Use `Ctrl+F` to search for `🔄` to find what's currently in progress.
+
 
 
 
