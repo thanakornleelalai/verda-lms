@@ -2,7 +2,7 @@
 
 > **Platform:** Online Course Marketplace (Thai / English)
 > **Stack:** Next.js 15 · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Vercel
-> **Last updated:** 2026-05-30 (Session 20 — Dashboard UI polish + Vitest unit tests (22 passing) + 2 build-blocking fixes · `npm run build` now green)
+> **Last updated:** 2026-05-30 (Session 21 — Modern typography (site-wide) + extended unit tests: 37 passing across 3 files)
 > **Version:** 1.0.0
 
 ---
@@ -1324,6 +1324,28 @@ S5 Track Progress          █████████████████�
 
 ---
 
+## Phase 22 — Typography & Test Coverage (Session 21 — 2026-05-30)
+
+### 22.1 — Modern Typography (site-wide)
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 22.1.1 | OpenType features + optimizeLegibility on body | ✅ | `app/globals.css` | kern, liga, calt — crisper Latin |
+| 22.1.2 | `text-wrap: balance` on all display headings | ✅ | `app/globals.css` | no orphan words in headings |
+| 22.1.3 | `.text-pretty` / `.text-balance` / `.read-thai` utilities | ✅ | `app/globals.css` | modern paragraph wrapping |
+| 22.1.4 | Tabular figures (`font-mono` + `.tabular`) | ✅ | `app/globals.css` | aligned prices/stats/timers/dates |
+| 22.1.5 | Thai-friendly tracking (−0.005em → 0) + leading 1.65 | ✅ | `app/globals.css` | tone marks/vowels no longer crowded |
+
+### 22.2 — Extended Test Coverage (Phase 14.3 cont.)
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 22.2.1 | Unit tests `lib/certificate-url.ts` (7 tests) | ✅ | `lib/certificate-url.test.ts` | verify URL + QR URL builders |
+| 22.2.2 | Unit tests `lib/company-content.ts` (8 tests) | ✅ | `lib/company-content.test.ts` | genId + slugify (incl. Thai) |
+| 22.2.3 | **Total: 37 unit tests passing** across 3 files | ✅ | — | `npm test` green |
+
+---
+
 ## Success KPIs (from PRD)
 
 Track these after launch:
@@ -1368,6 +1390,7 @@ v1.1 (Month 6+)
 5. Update "Last updated" date at the top of this file
 
 > **Tip:** Use `Ctrl+F` to search for `🔄` to find what's currently in progress.
+
 
 
 
