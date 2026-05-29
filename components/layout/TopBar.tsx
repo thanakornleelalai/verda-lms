@@ -12,6 +12,46 @@ import { Avatar } from "@/components/primitives/Avatar";
 import { Button } from "@/components/primitives/Button";
 import { Container } from "./Container";
 
+// ── Flag SVG components ─────────────────────────────────────────────────────
+
+function FlagTH({ className }: { className?: string }) {
+  // Thailand flag: 5 horizontal stripes — red/white/blue/white/red (ratio 1:1:2:1:1)
+  return (
+    <svg
+      viewBox="0 0 900 600"
+      className={`w-[22px] h-[15px] rounded-[2px] shrink-0 ${className ?? ""}`}
+      aria-label="ธงชาติไทย"
+    >
+      <rect width="900" height="600" fill="#A51931" />
+      <rect y="100" width="900" height="500" fill="#F4F5F8" />
+      <rect y="200" width="900" height="400" fill="#2D2A4A" />
+      <rect y="400" width="900" height="200" fill="#F4F5F8" />
+      <rect y="500" width="900" height="100" fill="#A51931" />
+    </svg>
+  );
+}
+
+function FlagGB({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 60 30"
+      className={`w-[22px] h-[12px] rounded-[2px] shrink-0 ${className ?? ""}`}
+      aria-label="UK Flag"
+    >
+      {/* Blue background */}
+      <rect width="60" height="30" fill="#012169" />
+      {/* White diagonals (St Andrew + St Patrick base) */}
+      <path d="M0,0 60,30 M60,0 0,30" stroke="#fff" strokeWidth="6" />
+      {/* Red diagonals (St Patrick cross) */}
+      <path d="M0,0 60,30 M60,0 0,30" stroke="#C8102E" strokeWidth="4" />
+      {/* White cross (St George base) */}
+      <path d="M30,0 V30 M0,15 H60" stroke="#fff" strokeWidth="10" />
+      {/* Red cross (St George) */}
+      <path d="M30,0 V30 M0,15 H60" stroke="#C8102E" strokeWidth="6" />
+    </svg>
+  );
+}
+
 export function TopBar() {
   const t = useTranslations();
   const locale = useLocale();
@@ -205,11 +245,16 @@ export function TopBar() {
             title={locale === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย"}
             className="h-[38px] px-2.5 rounded-pill border border-line bg-paper-2 hover:border-viridian hover:text-viridian transition-colors flex items-center gap-1.5 text-ink-2"
           >
-            <span className="font-mono text-[11px] tracking-[0.08em] uppercase font-medium leading-none">
-              {locale === "th" ? "🇹🇭 TH" : "🇺🇸 EN"}
+            {/* Active locale flag */}
+            {locale === "th" ? <FlagTH /> : <FlagGB />}
+            <span className="font-mono text-[11px] tracking-[0.06em] uppercase font-medium leading-none">
+              {locale === "th" ? "TH" : "EN"}
             </span>
+            <span className="font-mono text-[10px] text-ink-4 leading-none">·</span>
+            {/* Target locale flag */}
+            {locale === "th" ? <FlagGB className="opacity-40" /> : <FlagTH className="opacity-40" />}
             <span className="font-mono text-[10px] text-ink-4 leading-none">
-              {locale === "th" ? "/ EN" : "/ TH"}
+              {locale === "th" ? "EN" : "TH"}
             </span>
           </button>
 
