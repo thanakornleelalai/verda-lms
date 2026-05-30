@@ -2,7 +2,7 @@
 
 > **Platform:** Online Course Marketplace (Thai / English)
 > **Stack:** Next.js 15 · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Vercel
-> **Last updated:** 2026-05-30 (Session 22 — Tenant provisioning admin page (/admin/tenants) · all checks green: 37 tests, lint, tsc, build)
+> **Last updated:** 2026-05-30 (Session 23 — Dynamic homepage: popular-courses banner + trending marquee · AI/Data section removed · PRD/README synced)
 > **Version:** 1.0.0
 
 ---
@@ -1360,6 +1360,21 @@ S5 Track Progress          █████████████████�
 
 ---
 
+## Phase 24 — Dynamic Homepage (Session 23 — 2026-05-30)
+
+> หน้าแรกทันสมัย มี movement ตลอดเวลา สำหรับผู้เรียนรุ่นใหม่
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 24.1 | Popular Courses Banner — auto-rotating carousel | ✅ | `components/home/PopularCoursesBanner.tsx` | Top 5 by enrollment, 6s rotate, pause-on-hover |
+| 24.2 | Live badge + animated gradient + glow drift | ✅ | — | animate-ping + per-slide gradient |
+| 24.3 | Progress bar + dot indicators + prev/next arrows | ✅ | — | `banner-progress` keyframe |
+| 24.4 | Trending Marquee — infinite topics ticker | ✅ | `components/home/TrendingMarquee.tsx` | 32s loop, hover-pause, edge fade |
+| 24.5 | ลบ AI/Data Science section ออก | ✅ | `app/[locale]/(public)/page.tsx` | flow กระชับขึ้น |
+| 24.6 | keyframes `marquee` + `.animate-marquee` | ✅ | `app/globals.css` | reduced-motion safe |
+
+---
+
 ## Success KPIs (from PRD)
 
 Track these after launch:
@@ -1404,6 +1419,7 @@ v1.1 (Month 6+)
 5. Update "Last updated" date at the top of this file
 
 > **Tip:** Use `Ctrl+F` to search for `🔄` to find what's currently in progress.
+
 
 
 

@@ -2,7 +2,7 @@
 
 > **Platform:** Online Course Marketplace (Thai / English Bilingual)
 > **Version:** 1.0.0
-> **Last updated:** 2026-05-29 (Session 15 — Verdy AI Chatbot + Language Switcher + Flag icons)
+> **Last updated:** 2026-05-30 (Session 22 — Dynamic homepage banner/marquee + Tenant provisioning + UI polish + typography + tests)
 > **Status:** Core modules complete — demo-ready
 
 ---
@@ -682,6 +682,52 @@ Flag components: <FlagTH /> และ <FlagGB /> เป็น inline SVG ไม�
 | File | Purpose |
 |------|---------|
 | `components/layout/TopBar.tsx` | เพิ่ม `FlagTH`, `FlagGB` SVG components + `handleLocaleSwitch()` + ปุ่มสลับ |
+
+---
+
+## Feature 12 — Dynamic Homepage (Popular Banner + Trending Marquee)
+
+**สถานะ:** ✅ Implemented (2026-05-30)
+
+### Problem Statement
+หน้าแรกต้องดูทันสมัย มี movement ตลอดเวลา เพื่อดึงดูดผู้เรียนรุ่นใหม่ และโชว์คอร์สยอดนิยมแบบไดนามิก
+
+### Acceptance Criteria
+- [x] **AC-12.1 — Popular Courses Banner:** carousel เต็มความกว้าง โชว์ Top 5 คอร์ส (เรียงตาม `enrollmentCount`) หมุนอัตโนมัติทุก 6 วินาที
+- [x] **AC-12.2 — Auto-rotate + progress bar:** มีแถบ progress บอกเวลา + pause on hover
+- [x] **AC-12.3 — Live badge + animated gradient:** จุดเต้น (animate-ping) + พื้นหลังไล่สีตามคอร์ส + glow ลอย (drift)
+- [x] **AC-12.4 — Split layout:** ข้อมูลซ้าย (title/instructor/rating/ผู้เรียน/ราคา/CTA) + art card ขวา (glassmorphism)
+- [x] **AC-12.5 — Dot indicators + arrows:** เลือกสไลด์ได้ + ปุ่ม prev/next
+- [x] **AC-12.6 — Trending Marquee:** ticker หัวข้อเทรนด์เลื่อนต่อเนื่องไร้รอยต่อ (infinite loop 32s) + hover pause + edge fade
+- [x] **AC-12.7 — ลบ AI/Data section เดิมออก** เพื่อ flow ที่กระชับขึ้น
+- [x] **AC-12.8 — เคารพ `prefers-reduced-motion`** ทุก animation
+
+### Files
+| File | Purpose |
+|------|---------|
+| `components/home/PopularCoursesBanner.tsx` | Auto-rotating carousel (client) |
+| `components/home/TrendingMarquee.tsx` | Infinite trending-topics ticker |
+| `app/[locale]/(public)/page.tsx` | `PopularBanner` server wrapper + render order |
+| `app/globals.css` | keyframes `banner-progress`, `marquee` + `.animate-marquee` |
+
+---
+
+## Feature 13 — Tenant Provisioning (Advanced Admin · Multi-tenant)
+
+**สถานะ:** ✅ Implemented (2026-05-30)
+
+### Acceptance Criteria
+- [x] **AC-13.1 — Tenant list + create form:** `/admin/tenants` — ชื่อ/slug/custom domain/แผน/ส่วนแบ่งรายได้ %
+- [x] **AC-13.2 — Server Actions:** `getTenants` / `createTenant` / `deleteTenant` + admin guard + DB fallback
+- [x] **AC-13.3 — Revenue share config** ต่อ tenant (เก็บใน `settings.revenueShare`)
+- [x] **AC-13.4 — Protect default tenant** — `tnt_001` ลบไม่ได้
+- [x] **AC-13.5 — AdminSidebar nav** เพิ่มเมนู Tenants (Building2 icon)
+
+### Files
+| File | Purpose |
+|------|---------|
+| `actions/admin.ts` | tenant CRUD actions |
+| `app/[locale]/(admin)/admin/tenants/TenantManager.tsx` + `page.tsx` | provisioning UI |
 
 ---
 
