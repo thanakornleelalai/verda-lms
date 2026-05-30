@@ -2,7 +2,7 @@
 
 > **Platform:** Online Course Marketplace (Thai / English)
 > **Stack:** Next.js 15 · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Vercel
-> **Last updated:** 2026-05-30 (Session 24 — Student feedback module: wishlist + course/instructor reviews + course Q&A · all checks green)
+> **Last updated:** 2026-05-30 (Session 25 — Shopping cart module + .next cache-fix note · all checks green)
 > **Version:** 1.0.0
 
 ---
@@ -1407,6 +1407,30 @@ S5 Track Progress          █████████████████�
 
 ---
 
+## Phase 26 — Shopping Cart (Session 25 — 2026-05-30)
+
+> ตะกร้าสินค้าจริง — กดสั่งซื้อคอร์สเก็บไว้ก่อนจ่ายเงิน
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 26.1 | Cart context + localStorage persistence | ✅ | `lib/cart.tsx` | persist + sync ข้ามแท็บ, กันเพิ่มซ้ำ |
+| 26.2 | `AddToCartButton` — inline add + "เพิ่มแล้ว"/"ดูในตะกร้า" | ✅ | `components/course/AddToCartButton.tsx` | |
+| 26.3 | Cart page อ่านจาก cart จริง (เลิก hardcoded) | ✅ | `(public)/cart/page.tsx` | resolve slugs → courses |
+| 26.4 | รับ `?course=slug` เพิ่มเข้าตะกร้า + clean URL | ✅ | `(public)/cart/page.tsx` | จาก course/wishlist/enroll |
+| 26.5 | ลบรายการในตะกร้า (remove) | ✅ | — | `cart.remove(slug)` |
+| 26.6 | Clear cart อัตโนมัติหลัง checkout สำเร็จ | ✅ | — | ทั้ง Stripe + PromptPay |
+| 26.7 | TopBar cart icon + count badge | ✅ | `components/layout/TopBar.tsx` | สีเขียว viridian |
+| 26.8 | CartProvider mounted in locale layout | ✅ | `app/[locale]/layout.tsx` | |
+| 26.9 | เชื่อมกับ payment module (coupon + Stripe + PromptPay) | ✅ | — | flow ครบ |
+
+---
+
+## Build / Cache Note
+
+> **`.next` corruption บน Windows:** บางครั้ง `next build` ขึ้น `Cannot find module './XXXX.js'` หรือ `missing required error components` — เกิดจาก `.next` cache เสีย/ปนกัน ไม่ใช่ error ในโค้ด **แก้:** `Remove-Item -Recurse -Force .next` แล้ว build/dev ใหม่
+
+---
+
 ## Success KPIs (from PRD)
 
 Track these after launch:
@@ -1451,6 +1475,7 @@ v1.1 (Month 6+)
 5. Update "Last updated" date at the top of this file
 
 > **Tip:** Use `Ctrl+F` to search for `🔄` to find what's currently in progress.
+
 
 
 
