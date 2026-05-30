@@ -2,7 +2,7 @@
 
 > **Platform:** Online Course Marketplace (Thai / English Bilingual)
 > **Version:** 1.0.0
-> **Last updated:** 2026-05-30 (Session 22 — Dynamic homepage banner/marquee + Tenant provisioning + UI polish + typography + tests)
+> **Last updated:** 2026-05-30 (Session 25 — Student engagement: wishlist + reviews/Q&A + shopping cart · error boundaries)
 > **Status:** Core modules complete — demo-ready
 
 ---
@@ -728,6 +728,44 @@ Flag components: <FlagTH /> และ <FlagGB /> เป็น inline SVG ไม�
 |------|---------|
 | `actions/admin.ts` | tenant CRUD actions |
 | `app/[locale]/(admin)/admin/tenants/TenantManager.tsx` + `page.tsx` | provisioning UI |
+
+---
+
+## Feature 14 — Student Engagement (Wishlist · Reviews · Q&A · Cart)
+
+**สถานะ:** ✅ Implemented (2026-05-30)
+
+### Problem Statement
+ผู้เรียนต้องการ: แสดงความเห็นต่อคอร์ส/ผู้สอน, สอบถามข้อสงสัย, กดคอร์สที่ถูกใจไว้ก่อน, และเก็บคอร์สในตะกร้าก่อนจ่ายเงิน
+
+### 14.1 — Wishlist (กดคอร์สที่ถูกใจ)
+- [x] **AC-14.1.1** — ปุ่มหัวใจบน CourseCard + หน้าคอร์ส บันทึกด้วย localStorage (persist + sync ข้ามแท็บ)
+- [x] **AC-14.1.2** — หน้า `/dashboard/wishlist` รวมคอร์สที่ถูกใจ → ปุ่ม "ลงทะเบียน" ไปตะกร้า
+- [x] **AC-14.1.3** — TopBar มีไอคอนหัวใจ + badge จำนวน
+
+### 14.2 — Course & Instructor Reviews
+- [x] **AC-14.2.1** — ฟอร์มให้คะแนน 2 แกน (คอร์ส + ผู้สอน) + comment บนหน้าคอร์ส
+- [x] **AC-14.2.2** — แสดงรีวิวจริง + คะแนนเฉลี่ยแยกคอร์ส/ผู้สอน (แทน static เดิม)
+
+### 14.3 — Course Q&A (สอบถามข้อสงสัย)
+- [x] **AC-14.3.1** — แท็บ "ถาม-ตอบ" บนหน้าคอร์ส — ส่งคำถาม + แสดงคำตอบจากผู้สอน
+- [x] **AC-14.3.2** — Q&A ระดับบทเรียนใน LessonPlayer (มีอยู่เดิม)
+
+### 14.4 — Shopping Cart (ตะกร้าก่อนจ่ายเงิน)
+- [x] **AC-14.4.1** — ตะกร้าจริงด้วย localStorage (persist + กันเพิ่มซ้ำ)
+- [x] **AC-14.4.2** — `AddToCartButton` inline + สถานะ "เพิ่มแล้ว"/"ดูในตะกร้า"
+- [x] **AC-14.4.3** — รับ `?course=slug` เพิ่มเข้าตะกร้า (จาก course/wishlist/enroll)
+- [x] **AC-14.4.4** — ลบรายการ + TopBar cart badge + clear หลัง checkout สำเร็จ
+- [x] **AC-14.4.5** — เชื่อม payment module เดิม (coupon + Stripe + PromptPay)
+
+### Files
+| File | Purpose |
+|------|---------|
+| `lib/wishlist.tsx` · `components/course/WishlistButton.tsx` | wishlist |
+| `app/[locale]/(student)/dashboard/wishlist/` | wishlist page |
+| `actions/reviews.ts` · `components/course/CourseReviews.tsx` | reviews + Q&A |
+| `lib/cart.tsx` · `components/course/AddToCartButton.tsx` | cart |
+| `app/[locale]/(public)/cart/page.tsx` | cart/checkout (wired to real cart) |
 
 ---
 
