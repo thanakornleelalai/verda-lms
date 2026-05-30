@@ -2,7 +2,7 @@
 
 > **Platform:** Online Course Marketplace (Thai / English)
 > **Stack:** Next.js 15 · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Vercel
-> **Last updated:** 2026-05-30 (Session 23 — Dynamic homepage: popular-courses banner + trending marquee · AI/Data section removed · PRD/README synced)
+> **Last updated:** 2026-05-30 (Session 24 — Student feedback module: wishlist + course/instructor reviews + course Q&A · all checks green)
 > **Version:** 1.0.0
 
 ---
@@ -1375,6 +1375,38 @@ S5 Track Progress          █████████████████�
 
 ---
 
+## Phase 25 — Student Feedback & Wishlist (Session 24 — 2026-05-30)
+
+> การแสดงความเห็นต่อคอร์ส/ผู้สอน · สอบถามข้อสงสัย · กดถูกใจไว้ลงทะเบียนภายหลัง
+
+### 25.1 — Wishlist (กดคอร์สที่ถูกใจ)
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 25.1.1 | Wishlist context + localStorage persistence | ✅ | `lib/wishlist.tsx` | persist ข้ามรีโหลด/แท็บ, SSR-safe |
+| 25.1.2 | `WishlistButton` (full + icon variants) | ✅ | `components/course/WishlistButton.tsx` | ใช้บนหน้าคอร์ส |
+| 25.1.3 | CourseCard heart wired to real store | ✅ | `components/course/CourseCard.tsx` | เดิมเป็น local useState |
+| 25.1.4 | `/dashboard/wishlist` — saved courses → enroll | ✅ | `dashboard/wishlist/page.tsx` + `WishlistClient.tsx` | ปุ่มลงทะเบียนไปตะกร้า |
+| 25.1.5 | TopBar heart icon + count badge | ✅ | `components/layout/TopBar.tsx` | ลิงก์ไป wishlist |
+| 25.1.6 | WishlistProvider mounted in locale layout | ✅ | `app/[locale]/layout.tsx` | |
+
+### 25.2 — Course & Instructor Reviews
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 25.2.1 | Review Server Actions (get/add/summary) | ✅ | `actions/reviews.ts` | in-memory store + auth guard |
+| 25.2.2 | `CourseReviews` — display + write form | ✅ | `components/course/CourseReviews.tsx` | 2-axis rating (คอร์ส + ผู้สอน) + comment |
+| 25.2.3 | แทนที่ static reviews บนหน้าคอร์ส | ✅ | `(public)/courses/[slug]/page.tsx` | real reviews + avg แยกคอร์ส/ผู้สอน |
+
+### 25.3 — Course Q&A (สอบถามข้อสงสัย)
+
+| # | Task | Status | File | Notes |
+|---|------|--------|------|-------|
+| 25.3.1 | Q&A Server Actions (get/ask) | ✅ | `actions/reviews.ts` | `getQuestions` / `askQuestion` |
+| 25.3.2 | Q&A tab in CourseReviews — ask + answer display | ✅ | `components/course/CourseReviews.tsx` | คำถาม + คำตอบจากผู้สอน |
+
+---
+
 ## Success KPIs (from PRD)
 
 Track these after launch:
@@ -1419,6 +1451,7 @@ v1.1 (Month 6+)
 5. Update "Last updated" date at the top of this file
 
 > **Tip:** Use `Ctrl+F` to search for `🔄` to find what's currently in progress.
+
 
 
 
