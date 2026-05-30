@@ -38,7 +38,7 @@ VERDA LMS เป็นแพลตฟอร์มการเรียนรู�
 | หมวด | เทคโนโลยี |
 |------|-----------|
 | Frontend | Next.js 15 (App Router) + TypeScript + Tailwind CSS |
-| ฐานข้อมูล | PostgreSQL (Neon) + Prisma ORM v6 |
+| ฐานข้อมูล | PostgreSQL (Supabase) + Prisma ORM v6 |
 | การยืนยันตัวตน | NextAuth v5 — รองรับ Email, Google, LINE และ Phone OTP |
 | วิดีโอ | Mux Player |
 | การชำระเงิน | Stripe (บัตรเครดิต) และ Omise (PromptPay) |
@@ -133,12 +133,19 @@ cp .env.example .env.local
 
 จากนั้นเปิดไฟล์ `.env.local` และกรอกค่าที่จำเป็น (โปรดดูรายละเอียดในหัวข้อที่ 5)
 
-### ขั้นตอนที่ 3 — ตั้งค่าฐานข้อมูล
+### ขั้นตอนที่ 3 — ตั้งค่าฐานข้อมูล (Supabase)
+
+สร้างโครงการใหม่ที่ [supabase.com](https://supabase.com) จากนั้นคัดลอก Connection Strings จากเมนู **Connect → ORMs → Prisma** มาใส่ในไฟล์ `.env.local`
 
 ```bash
-npx prisma generate
-npx prisma db push
+# รัน Migration เพื่อสร้างตาราง
+npx prisma migrate deploy
+
+# (ไม่บังคับ) บันทึกข้อมูลตัวอย่างลงฐานข้อมูล
+npx prisma db seed
 ```
+
+> **หมายเหตุ:** หากไม่ตั้งค่า `DATABASE_URL` ระบบจะทำงานในโหมด Mock Data โดยอัตโนมัติ
 
 ### ขั้นตอนที่ 4 — เริ่มต้นเซิร์ฟเวอร์สำหรับพัฒนา
 
@@ -154,30 +161,51 @@ npm run dev
 
 ## 5. การตั้งค่า Environment Variables
 
-| ตัวแปร | วัตถุประสงค์ | สถานะ |
-|--------|--------------|--------|
-| `DATABASE_URL` | เชื่อมต่อฐานข้อมูล PostgreSQL (Neon) | จำเป็น |
-| `AUTH_SECRET` | เข้ารหัส Session (สตริงสุ่ม 32 ตัวอักษร) | จำเป็น |
-| `NEXT_PUBLIC_BASE_URL` | URL ของแอปพลิเคชัน | จำเป็น |
-| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | เข้าสู่ระบบด้วย Google | ไม่บังคับ |
-| `STRIPE_SECRET_KEY` | รับชำระเงินผ่านบัตรเครดิต | ไม่บังคับ |
-| `OMISE_SECRET_KEY` | รับชำระเงินผ่าน PromptPay | ไม่บังคับ |
-| `MUX_TOKEN_ID` / `MUX_TOKEN_SECRET` | อัปโหลดและเล่นวิดีโอ | ไม่บังคับ |
-| `RESEND_API_KEY` | ส่งอีเมล | ไม่บังคับ |
-| `BLOB_READ_WRITE_TOKEN` | จัดเก็บไฟล์ | ไม่บังคับ |
-| `KV_URL` | ระบบแคช Redis (ตัวจับเวลาแบบทดสอบ) | ไม่บังคับ |
+### 5.1 ตัวแปรที่จำเป็น (Required)
 
-> รายละเอียดทั้งหมดของตัวแปรอยู่ในไฟล์ `.env.example`
+| ตัวแปร | วัตถุประสงค์ |
+|--------|--------------|
+| `AUTH_SECRET` | เข้ารหัส Session (สร้างด้วย `openssl rand -base64 32`) |
+| `DATABASE_URL` | Supabase Transaction Pooler (port 6543) |
+| `DIRECT_URL` | Supabase Session Pooler (port 5432) สำหรับ Prisma migrate |
+| `NEXT_PUBLIC_BASE_URL` | URL ของแอปพลิเคชัน เช่น `https://verda-lms.vercel.app` |
+
+### 5.2 ตัวแปร Supabase
+
+| ตัวแปร | วัตถุประสงค์ |
+|--------|--------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Project URL เช่น `https://xxxxx.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Publishable key (`sb_publishable_...`) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Secret key (`sb_secret_...`) |
+
+### 5.3 ตัวแปรเพิ่มเติม (Optional)
+
+| ตัวแปร | วัตถุประสงค์ |
+|--------|--------------|
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | เข้าสู่ระบบด้วย Google |
+| `AUTH_LINE_ID` / `AUTH_LINE_SECRET` | เข้าสู่ระบบด้วย LINE |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | รับชำระเงินผ่านบัตรเครดิต |
+| `OMISE_SECRET_KEY` / `OMISE_PUBLIC_KEY` | รับชำระเงินผ่าน PromptPay |
+| `MUX_TOKEN_ID` / `MUX_TOKEN_SECRET` | อัปโหลดและเล่นวิดีโอ |
+| `RESEND_API_KEY` | ส่งอีเมล (password reset, email verify) |
+| `BLOB_READ_WRITE_TOKEN` | จัดเก็บไฟล์ (Vercel Blob) |
+| `KV_REST_API_URL` / `KV_REST_API_TOKEN` | Rate limiting, quiz timer (Vercel KV) |
+| `ANTHROPIC_API_KEY` | AI Chatbot (fallback ใช้ keyword matching) |
+
+> รายละเอียดทั้งหมดอยู่ในไฟล์ `.env.example`
 
 ---
 
-## 6. บัญชีทดสอบ (Development)
+## 6. บัญชีทดสอบ
 
-| บทบาท | อีเมล | รหัสผ่าน |
-|-------|-------|----------|
-| ผู้เรียน | `student@verda.dev` | `demo1234` |
-| ผู้สอน | `instructor@verda.dev` | `demo1234` |
-| ผู้ดูแลระบบ | `admin@verda.dev` | `demo1234` |
+บัญชีเหล่านี้ถูกสร้างโดยคำสั่ง `npm run db:seed` และใช้งานได้ทั้งในโหมด Mock และ Supabase จริง
+
+| บทบาท | อีเมล | รหัสผ่าน | เส้นทางหลัก |
+|-------|-------|----------|-------------|
+| ผู้เรียน | `student@verda.dev` | `student1234` | `/th/dashboard` |
+| ผู้สอน | `instructor@verda.dev` | `instructor1234` | `/th/studio` |
+| ผู้ดูแลระบบ | `admin@verda.dev` | `admin1234` | `/th/admin` |
+| Demo | `demo@verda.dev` | `demo1234` | `/th/dashboard` |
 
 ---
 
@@ -217,12 +245,30 @@ npx prisma studio    # เปิดเครื่องมือจัดกา
 
 ## 9. การนำขึ้นใช้งานจริง (Deployment)
 
-1. เข้าสู่ระบบ Vercel แล้วนำเข้า (Import) Repository นี้
-2. กรอก Environment Variables ทั้งหมดในแดชบอร์ดของ Vercel
-3. กดปุ่ม Deploy ระบบจะดำเนินการสร้างและเผยแพร่โดยอัตโนมัติ
-4. ทุกครั้งที่ Push โค้ดเข้าสู่ Branch `main` ระบบจะ Deploy ใหม่โดยอัตโนมัติ
+### Production URL
+🌐 **https://verda-lms.vercel.app**
 
-> **CI/CD:** ทุก Pull Request จะมีการตรวจสอบ Lint และ Type-check โดยอัตโนมัติผ่าน GitHub Actions
+### ขั้นตอน Deploy
+
+1. สร้าง Supabase Project ที่ [supabase.com](https://supabase.com)
+2. Copy connection strings จาก **Connect → ORMs → Prisma**
+3. นำเข้า Repository นี้ใน [vercel.com](https://vercel.com)
+4. ตั้งค่า Environment Variables ใน Vercel Dashboard (ดูหัวข้อที่ 5)
+5. Deploy — ระบบจะรัน `prisma generate && prisma migrate deploy && next build` อัตโนมัติ
+
+### Vercel Environment Variables (Production)
+
+| ตัวแปร | สถานะ |
+|--------|--------|
+| `AUTH_SECRET` | ✅ ตั้งค่าแล้ว |
+| `DATABASE_URL` | ✅ Supabase Transaction Pooler |
+| `DIRECT_URL` | ✅ Supabase Session Pooler |
+| `NEXT_PUBLIC_BASE_URL` | ✅ https://verda-lms.vercel.app |
+| `NEXT_PUBLIC_SUPABASE_URL` | ✅ ตั้งค่าแล้ว |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ ตั้งค่าแล้ว |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✅ ตั้งค่าแล้ว |
+
+> **CI/CD:** ทุกครั้งที่ Push โค้ดเข้าสู่ Branch `main` ระบบจะ Deploy ใหม่โดยอัตโนมัติ
 
 ---
 
