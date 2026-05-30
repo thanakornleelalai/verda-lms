@@ -33,8 +33,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       token: "https://api.line.me/oauth2/v2.1/token",
       userinfo: "https://api.line.me/v2/profile",
-      clientId: process.env.AUTH_LINE_ID!,
-      clientSecret: process.env.AUTH_LINE_SECRET!,
+      clientId: process.env.AUTH_LINE_ID ?? process.env.LINE_CLIENT_ID ?? "",
+      clientSecret: process.env.AUTH_LINE_SECRET ?? process.env.LINE_CLIENT_SECRET ?? "",
       profile(profile) {
         return {
           id: profile.userId,

@@ -193,7 +193,7 @@ Plugin ที่แนะนำสำหรับ UX Designer
     title: "English for Tech Professionals",
     description:
       "พัฒนา Business English สำหรับนักเทค เขียน Email, ประชุม, พรีเซนต์ด้วยภาษาอังกฤษอย่างมืออาชีพ",
-    status: "PUBLISHED",
+    status: "REVIEW",
     price: 990,
     currency: "THB",
     level: "INTERMEDIATE",

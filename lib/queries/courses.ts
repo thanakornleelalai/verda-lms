@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import type { Course, CourseListResult } from "@/types";
 import { MOCK_COURSES, MOCK_CATEGORIES } from "@/mock";
+import { devGetCourses, devGetCourseBySlug } from "@/lib/dev-store";
 
 type DbCourse = Awaited<ReturnType<typeof fetchCoursesFromDb>>[number];
 
@@ -125,8 +126,14 @@ export async function getCourses(filter?: CoursesFilter): Promise<CourseListResu
     const total = await db.course.count({ where: buildWhere(filter) });
     return { courses: rows.map(adaptDbCourse), total, page, pageSize };
   } catch {
-    // DB not available — fall back to mock
-    let filtered = MOCK_COURSES.filter((c) => {
+    // DB not available — fall back to mock + dev-store courses
+    const allCourses = [
+      ...MOCK_COURSES,
+      // Include dev-store courses that are PUBLISHED (only show published in catalog)
+      ...devGetCourses().filter((c) => c.status === "PUBLISHED"),
+    ];
+
+    let filtered = allCourses.filter((c) => {
       if (filter?.query) {
         const q = filter.query.toLowerCase();
         if (!c.title.toLowerCase().includes(q) && !c.description?.toLowerCase().includes(q)) return false;
@@ -178,7 +185,8 @@ export async function getCourseBySlug(slug: string): Promise<Course | null> {
     if (!c) return null;
     return adaptDbCourse(c);
   } catch {
-    return MOCK_COURSES.find((c) => c.slug === slug) ?? null;
+    // Check dev-store first (newly created courses), then mock
+    return devGetCourseBySlug(slug) ?? MOCK_COURSES.find((c) => c.slug === slug) ?? null;
   }
 }
 

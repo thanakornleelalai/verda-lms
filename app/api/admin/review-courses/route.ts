@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { devGetReviewCourses } from "@/lib/dev-store";
 
 export async function GET() {
   const session = await auth();
@@ -47,7 +48,28 @@ export async function GET() {
 
     return NextResponse.json({ courses });
   } catch {
-    // DB unavailable — return empty list (graceful dev-mode degradation)
-    return NextResponse.json({ courses: [] });
+    // DB unavailable — return courses from dev-store + mock REVIEW courses
+    const { MOCK_COURSES } = await import("@/mock");
+    const devCourses = devGetReviewCourses();
+    const mockReview = MOCK_COURSES.filter((c) => c.status === "REVIEW");
+
+    const all = [...devCourses, ...mockReview];
+    const courses = all.map((c) => ({
+      id: c.id,
+      slug: c.slug,
+      title: c.title,
+      status: "REVIEW" as const,
+      level: c.level,
+      price: c.price,
+      currency: c.currency,
+      updatedAt: c.updatedAt ?? new Date().toISOString(),
+      instructor: {
+        name: c.instructor?.name ?? "—",
+        email: null,
+      },
+      lessonCount: c.sections?.reduce((n: number, s) => n + (s.lessons?.length ?? 0), 0) ?? 0,
+    }));
+
+    return NextResponse.json({ courses });
   }
 }

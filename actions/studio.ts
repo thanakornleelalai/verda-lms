@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { devAddCourse, devUpdateCourseStatus } from "@/lib/dev-store";
 
 function slugify(title: string): string {
   return title
@@ -80,6 +81,12 @@ export async function createCourseWithCurriculum(
       content?: string;
       isFree?: boolean;
       duration?: number;
+      quizQuestions?: Array<{
+        text: string;
+        type: "SINGLE" | "MULTIPLE";
+        order: number;
+        options: Array<{ text: string; isCorrect: boolean; order: number }>;
+      }>;
     }>;
   }>
 ): Promise<{ courseId?: string; slug?: string; status?: string; error?: string }> {
@@ -123,7 +130,7 @@ export async function createCourseWithCurriculum(
       });
       for (let li = 0; li < s.lessons.length; li++) {
         const l = s.lessons[li];
-        await db.lesson.create({
+        const dbLesson = await db.lesson.create({
           data: {
             sectionId: section.id,
             title: l.title,
@@ -135,6 +142,26 @@ export async function createCourseWithCurriculum(
             ...(l.duration ? { duration: l.duration } : {}),
           },
         });
+        // Create quiz + questions if provided inline
+        if (l.type === "QUIZ" && l.quizQuestions && l.quizQuestions.length > 0) {
+          const quiz = await db.quiz.create({
+            data: {
+              lessonId: dbLesson.id,
+              title: `แบบทดสอบ — ${l.title}`,
+              passingScore: 70,
+            },
+          });
+          for (const q of l.quizQuestions) {
+            const question = await db.question.create({
+              data: { quizId: quiz.id, text: q.text, type: q.type, order: q.order, points: 1 },
+            });
+            for (const opt of q.options) {
+              await db.questionOption.create({
+                data: { questionId: question.id, text: opt.text, isCorrect: opt.isCorrect, order: opt.order },
+              });
+            }
+          }
+        }
       }
     }
 
@@ -142,9 +169,72 @@ export async function createCourseWithCurriculum(
     revalidatePath("/admin/courses");
     return { courseId: course.id, slug: course.slug, status: course.status };
   } catch {
-    // DB unavailable in dev — surface a soft signal the client can handle.
-    return { error: "DB unavailable" };
+    // DB unavailable — store in-memory so the full flow still works in dev mode.
+    const session2 = await auth();
+    const isAdmin2 = (session2?.user as { role?: string } | null)?.role === "ADMIN";
+    const newCourseId = `dev_${Date.now()}`;
+    const newSlug = `${slugify(formData.title || "untitled")}-${Date.now().toString(36)}`;
+
+    const devCourse = {
+      id: newCourseId,
+      tenantId: "ten_default",
+      slug: newSlug,
+      title: formData.title,
+      description: formData.description ?? "",
+      status: (isAdmin2 ? "DRAFT" : "REVIEW") as "DRAFT" | "REVIEW",
+      price: formData.price,
+      currency: "THB",
+      level: (formData.level as "BEGINNER" | "INTERMEDIATE" | "ADVANCED"),
+      language: formData.language,
+      instructorId: session2?.user?.id ?? "usr_instructor_001",
+      instructor: {
+        id: session2?.user?.id ?? "usr_instructor_001",
+        name: session2?.user?.name ?? "อาจารย์ผู้สอน",
+        avatarUrl: (session2?.user as { image?: string } | null)?.image ?? undefined,
+      },
+      sections: sections.map((s, si) => ({
+        id: `dev_sec_${newCourseId}_${si}`,
+        courseId: newCourseId,
+        title: s.title,
+        order: si + 1,
+        lessons: s.lessons.map((l, li) => ({
+          id: `dev_les_${newCourseId}_${si}_${li}`,
+          sectionId: `dev_sec_${newCourseId}_${si}`,
+          title: l.title,
+          order: li + 1,
+          type: (l.type === "ARTICLE" ? "ARTICLE" : l.type === "QUIZ" ? "QUIZ" : "VIDEO") as "VIDEO" | "ARTICLE" | "QUIZ",
+          isFree: l.isFree ?? false,
+          videoAsset: l.videoAsset,
+          content: l.content,
+        })),
+      })),
+      totalDuration: 0,
+      enrollmentCount: 0,
+      rating: 0,
+      ratingCount: 0,
+      tags: [],
+      publishedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    devAddCourse(devCourse);
+    return { courseId: newCourseId, slug: newSlug, status: devCourse.status, error: "DB unavailable" };
   }
+}
+
+export async function devPublishCourse(courseId: string): Promise<{ error?: string }> {
+  devUpdateCourseStatus(courseId, "PUBLISHED");
+  revalidatePath("/admin/courses");
+  revalidatePath("/admin/moderation");
+  revalidatePath("/courses");
+  return {};
+}
+
+export async function devRejectCourse(courseId: string): Promise<{ error?: string }> {
+  devUpdateCourseStatus(courseId, "DRAFT");
+  revalidatePath("/admin/courses");
+  revalidatePath("/admin/moderation");
+  return {};
 }
 
 export async function updateCourse(

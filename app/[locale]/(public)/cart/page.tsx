@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,6 +20,14 @@ import { Trash2, Tag, CheckCircle, AlertCircle, CreditCard, QrCode, ShoppingBag,
 type Step = "cart" | "processing" | "qr";
 
 export default function CartPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-paper" />}>
+      <CartPageInner />
+    </Suspense>
+  );
+}
+
+function CartPageInner() {
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();

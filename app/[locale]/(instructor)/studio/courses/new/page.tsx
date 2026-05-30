@@ -14,18 +14,42 @@ import { parseVideoInput, providerLabel } from "@/lib/video-url";
 type Step = "basics" | "content" | "pricing" | "publish";
 
 // ── Draft curriculum types (in-memory until the course is created) ──────────────
+type QuizOptionDraft = { id: string; text: string; isCorrect: boolean };
+type QuizQuestionDraft = {
+  id: string;
+  text: string;
+  type: "SINGLE" | "MULTIPLE";
+  options: QuizOptionDraft[];
+};
+
 type LessonDraft = {
   id: string;
   title: string;
   type: string; // VIDEO | ARTICLE | QUIZ
-  videoUrl: string; // raw pasted link, parsed on submit
+  videoUrl: string;     // VIDEO: raw pasted link
+  content: string;      // ARTICLE: markdown/plain text body
+  quizQuestions: QuizQuestionDraft[];  // QUIZ: inline question builder
   isFree: boolean;
 };
+
 type SectionDraft = {
   id: string;
   title: string;
   lessons: LessonDraft[];
 };
+
+function newOption(): QuizOptionDraft {
+  return { id: crypto.randomUUID?.() ?? `opt_${Math.random()}`, text: "", isCorrect: false };
+}
+
+function newQuestion(): QuizQuestionDraft {
+  return {
+    id: crypto.randomUUID?.() ?? `q_${Math.random()}`,
+    text: "",
+    type: "SINGLE",
+    options: [newOption(), newOption(), newOption(), newOption()],
+  };
+}
 
 const LESSON_TYPE_OPTIONS = [
   { value: "VIDEO", label: "วิดีโอ" },
@@ -90,8 +114,21 @@ export default function NewCoursePage() {
               title: l.title.trim(),
               type: l.type,
               isFree: l.isFree,
-              videoAsset:
-                l.type === "VIDEO" ? parseVideoInput(l.videoUrl)?.token : undefined,
+              videoAsset: l.type === "VIDEO" ? parseVideoInput(l.videoUrl)?.token : undefined,
+              content: l.type === "ARTICLE" && l.content.trim() ? l.content.trim() : undefined,
+              quizQuestions:
+                l.type === "QUIZ" && l.quizQuestions.length > 0
+                  ? l.quizQuestions
+                      .filter((q) => q.text.trim() && q.options.some((o) => o.text.trim()))
+                      .map((q, qi) => ({
+                        text: q.text.trim(),
+                        type: q.type,
+                        order: qi + 1,
+                        options: q.options
+                          .filter((o) => o.text.trim())
+                          .map((o, oi) => ({ text: o.text.trim(), isCorrect: o.isCorrect, order: oi + 1 })),
+                      }))
+                  : undefined,
             })),
         }));
 
@@ -328,7 +365,21 @@ function ContentStep({
     setSections((prev) =>
       prev.map((s) =>
         s.id === sectionId
-          ? { ...s, lessons: [...s.lessons, { id: rid(), title: "", type: "VIDEO", videoUrl: "", isFree: false }] }
+          ? {
+              ...s,
+              lessons: [
+                ...s.lessons,
+                {
+                  id: rid(),
+                  title: "",
+                  type: "VIDEO",
+                  videoUrl: "",
+                  content: "",
+                  quizQuestions: [],
+                  isFree: false,
+                },
+              ],
+            }
           : s
       )
     );
@@ -433,7 +484,7 @@ function ContentStep({
                       </button>
                     </div>
 
-                    {/* YouTube / Drive link — for video lessons */}
+                    {/* ── VIDEO: YouTube / Drive link ── */}
                     {lesson.type === "VIDEO" && (
                       <div className="pl-6">
                         <div className="relative">
@@ -459,11 +510,176 @@ function ContentStep({
                         )}
                       </div>
                     )}
-                    {lesson.type === "QUIZ" && (
-                      <p className="pl-6 text-[11px] text-ink-4">สร้างคำถามได้ในหน้าแก้ไขหลังสร้างคอร์ส</p>
-                    )}
+
+                    {/* ── ARTICLE: inline content editor ── */}
                     {lesson.type === "ARTICLE" && (
-                      <p className="pl-6 text-[11px] text-ink-4">เขียนเนื้อหาบทความได้ในหน้าแก้ไขหลังสร้างคอร์ส</p>
+                      <div className="pl-6 flex flex-col gap-1">
+                        <p className="text-[11px] font-medium text-ink-3">เนื้อหาบทความ</p>
+                        <textarea
+                          rows={5}
+                          className="input-base text-[13px] resize-y font-thai leading-[1.8] w-full"
+                          placeholder="เขียนเนื้อหาบทเรียนที่นี่... (เว้นบรรทัด = ขึ้นย่อหน้าใหม่)"
+                          value={lesson.content}
+                          onChange={(e) => updateLesson(section.id, lesson.id, { content: e.target.value })}
+                        />
+                        <p className="text-[10px] text-ink-4 font-mono">{lesson.content.length} ตัวอักษร</p>
+                      </div>
+                    )}
+
+                    {/* ── QUIZ: inline question builder ── */}
+                    {lesson.type === "QUIZ" && (
+                      <div className="pl-6 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-[11px] font-medium text-ink-3">
+                            คำถาม {lesson.quizQuestions.length > 0 ? `(${lesson.quizQuestions.length} ข้อ)` : ""}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateLesson(section.id, lesson.id, {
+                                quizQuestions: [...lesson.quizQuestions, newQuestion()],
+                              })
+                            }
+                            className="flex items-center gap-1 text-[11px] text-viridian hover:underline"
+                          >
+                            <Plus size={11} /> เพิ่มคำถาม
+                          </button>
+                        </div>
+
+                        {lesson.quizQuestions.length === 0 && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateLesson(section.id, lesson.id, {
+                                quizQuestions: [newQuestion()],
+                              })
+                            }
+                            className="flex items-center justify-center gap-1.5 py-2.5 text-[12px] text-ink-3 hover:text-viridian border border-dashed border-line rounded-r2 hover:border-viridian-3 transition-colors w-full"
+                          >
+                            <ClipboardCheck size={13} /> เพิ่มคำถามแบบทดสอบ
+                          </button>
+                        )}
+
+                        {lesson.quizQuestions.map((q, qi) => (
+                          <div key={q.id} className="border border-line rounded-r2 p-3 bg-paper-2 flex flex-col gap-2">
+                            {/* Question header */}
+                            <div className="flex items-start gap-2">
+                              <span className="font-mono text-[10px] text-viridian bg-viridian/10 px-1.5 py-0.5 rounded shrink-0 mt-1">
+                                ข้อ {qi + 1}
+                              </span>
+                              <div className="flex-1 flex flex-col gap-1.5">
+                                <textarea
+                                  rows={2}
+                                  className="input-base text-[12px] resize-none font-thai w-full"
+                                  placeholder="พิมพ์คำถาม..."
+                                  value={q.text}
+                                  onChange={(e) =>
+                                    updateLesson(section.id, lesson.id, {
+                                      quizQuestions: lesson.quizQuestions.map((qq) =>
+                                        qq.id === q.id ? { ...qq, text: e.target.value } : qq
+                                      ),
+                                    })
+                                  }
+                                />
+                                <div className="flex items-center gap-2">
+                                  <label className="text-[11px] text-ink-3">ประเภท:</label>
+                                  <select
+                                    className="input-base text-[11px] py-0.5 w-[130px]"
+                                    value={q.type}
+                                    onChange={(e) =>
+                                      updateLesson(section.id, lesson.id, {
+                                        quizQuestions: lesson.quizQuestions.map((qq) =>
+                                          qq.id === q.id
+                                            ? { ...qq, type: e.target.value as "SINGLE" | "MULTIPLE" }
+                                            : qq
+                                        ),
+                                      })
+                                    }
+                                  >
+                                    <option value="SINGLE">เลือก 1 ข้อ</option>
+                                    <option value="MULTIPLE">เลือกหลายข้อ</option>
+                                  </select>
+                                  <span className="text-[10px] text-ink-4">
+                                    {q.type === "SINGLE" ? "คลิก ● เลือกคำตอบที่ถูก" : "คลิก ● เลือกได้หลายข้อ"}
+                                  </span>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateLesson(section.id, lesson.id, {
+                                    quizQuestions: lesson.quizQuestions.filter((qq) => qq.id !== q.id),
+                                  })
+                                }
+                                className="p-1 text-ink-4 hover:text-danger transition-colors shrink-0"
+                                title="ลบคำถาม"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+
+                            {/* Options */}
+                            <div className="flex flex-col gap-1.5 ml-8">
+                              {q.options.map((opt, oi) => (
+                                <div key={opt.id} className="flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      updateLesson(section.id, lesson.id, {
+                                        quizQuestions: lesson.quizQuestions.map((qq) =>
+                                          qq.id === q.id
+                                            ? {
+                                                ...qq,
+                                                options: qq.options.map((o) =>
+                                                  q.type === "SINGLE"
+                                                    ? { ...o, isCorrect: o.id === opt.id }
+                                                    : o.id === opt.id
+                                                    ? { ...o, isCorrect: !o.isCorrect }
+                                                    : o
+                                                ),
+                                              }
+                                            : qq
+                                        ),
+                                      })
+                                    }
+                                    className={`w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-all ${
+                                      opt.isCorrect
+                                        ? "bg-ok border-ok"
+                                        : "border-line hover:border-ok/50"
+                                    }`}
+                                    title={opt.isCorrect ? "คำตอบที่ถูก" : "คลิกเพื่อเลือกเป็นคำตอบถูก"}
+                                  >
+                                    {opt.isCorrect && <CheckCircle size={11} className="text-white" />}
+                                  </button>
+                                  <span className="font-mono text-[10px] text-ink-4 w-4 shrink-0">
+                                    {["A","B","C","D"][oi]}
+                                  </span>
+                                  <input
+                                    type="text"
+                                    className="input-base text-[12px] py-1 flex-1"
+                                    placeholder={`ตัวเลือก ${["A","B","C","D"][oi]}`}
+                                    value={opt.text}
+                                    onChange={(e) =>
+                                      updateLesson(section.id, lesson.id, {
+                                        quizQuestions: lesson.quizQuestions.map((qq) =>
+                                          qq.id === q.id
+                                            ? {
+                                                ...qq,
+                                                options: qq.options.map((o) =>
+                                                  o.id === opt.id ? { ...o, text: e.target.value } : o
+                                                ),
+                                              }
+                                            : qq
+                                        ),
+                                      })
+                                    }
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 );

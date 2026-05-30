@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { MOCK_COURSES } from "@/mock";
 import { EyebrowLabel } from "@/components/primitives/EyebrowLabel";
 import { CourseListClient, type CourseRow } from "./CourseListClient";
+import { devGetCourses } from "@/lib/dev-store";
 
 export const dynamic = "force-dynamic";
 
@@ -53,12 +54,19 @@ export default async function AdminCoursesPage({
       updatedAt: c.updatedAt.toISOString().slice(0, 10),
     }));
   } catch {
-    total = MOCK_COURSES.length;
-    courses = MOCK_COURSES.map((c) => ({
+    // DB unavailable — merge dev-store + mock courses (dev-store first so REVIEW shows up)
+    const devCourses = devGetCourses();
+    const devIds = new Set(devCourses.map((c) => c.id));
+    const allCourses = [
+      ...devCourses,
+      ...MOCK_COURSES.filter((c) => !devIds.has(c.id)),
+    ];
+    total = allCourses.length;
+    courses = allCourses.map((c) => ({
       id: c.id,
       slug: c.slug,
       title: c.title,
-      instructorName: c.instructor.name,
+      instructorName: c.instructor?.name ?? "—",
       status: c.status,
       price: c.price,
       currency: c.currency,
@@ -66,7 +74,7 @@ export default async function AdminCoursesPage({
       rating: c.rating,
       monogram: c.monogram ?? null,
       art: c.art ?? null,
-      updatedAt: c.updatedAt.slice(0, 10),
+      updatedAt: (c.updatedAt ?? new Date().toISOString()).slice(0, 10),
     }));
   }
 
