@@ -11,16 +11,13 @@ import { Button } from "@/components/primitives/Button";
 
 type Mode = "login" | "signup";
 
-// Dev test accounts — shown only in dev mode hint panel
+// Production test accounts — Supabase DB (seeded)
 const DEV_ACCOUNTS = [
   { role: "Admin",      email: "admin@verda.dev",      password: "admin1234",      dest: "Admin Panel → /admin" },
   { role: "Instructor", email: "instructor@verda.dev", password: "instructor1234", dest: "Instructor Studio → /studio" },
-  { role: "Student",   email: "student@verda.dev",    password: "student1234",    dest: "Dashboard → /dashboard" },
-  { role: "Demo",      email: "demo@verda.dev",        password: "demo1234",       dest: "Dashboard + mock data" },
+  { role: "Student",    email: "student@verda.dev",    password: "student1234",    dest: "Dashboard → /dashboard" },
+  { role: "Demo",       email: "demo@verda.dev",        password: "demo1234",       dest: "Dashboard → /dashboard" },
 ];
-
-const DEV_PHONE_OTP      = { phone: "081-234-5678", otp: "123456",   dest: "Dashboard → /dashboard" };
-const DEV_PHONE_PASSWORD = { phone: "081-234-5678", password: "phone1234", dest: "Dashboard → /dashboard" };
 
 function DevHint() {
   const [open, setOpen] = useState(false);
@@ -30,7 +27,7 @@ function DevHint() {
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between px-3 py-2 font-mono text-amber-700 hover:bg-amber-100 transition-colors"
       >
-        <span>🔑 Dev Test Accounts</span>
+        <span>🔑 Test Accounts (Supabase)</span>
         {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
       </button>
       {open && (
@@ -55,22 +52,8 @@ function DevHint() {
               ))}
             </tbody>
           </table>
-          <div className="border-t border-amber-100 px-3 py-2 flex flex-col gap-1.5">
-            <p className="text-[10px] font-mono font-semibold text-amber-700">📱 Phone + Password Login</p>
-            <p className="text-[10px] text-amber-800">
-              เบอร์: <span className="font-mono font-semibold">{DEV_PHONE_PASSWORD.phone}</span>
-              {"  "}Password: <span className="font-mono font-semibold">{DEV_PHONE_PASSWORD.password}</span>
-              {"  "}<span className="text-amber-600">{DEV_PHONE_PASSWORD.dest}</span>
-            </p>
-            <p className="text-[10px] font-mono font-semibold text-amber-700 mt-0.5">📱 Phone + OTP Login</p>
-            <p className="text-[10px] text-amber-800">
-              เบอร์: <span className="font-mono font-semibold">{DEV_PHONE_OTP.phone}</span>
-              {"  "}OTP: <span className="font-mono font-semibold">{DEV_PHONE_OTP.otp}</span>
-              {"  "}<span className="text-amber-600">{DEV_PHONE_OTP.dest}</span>
-            </p>
-          </div>
-          <p className="px-3 py-1.5 text-[10px] text-amber-600 border-t border-amber-100">
-            ใช้ได้เฉพาะตอนไม่มี DATABASE_URL (dev mode bypass)
+          <p className="px-3 py-2 text-[10px] text-amber-600 border-t border-amber-100">
+            บัญชีเหล่านี้ใช้งานได้จริงบน Supabase — ทั้ง Local และ Production
           </p>
         </div>
       )}
