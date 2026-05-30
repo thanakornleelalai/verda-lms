@@ -7,6 +7,7 @@ import { PWAInstallBanner } from "@/components/pwa/PWAInstallBanner";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { VerdyChat } from "@/components/chatbot/VerdyChat";
 import { WishlistProvider } from "@/lib/wishlist";
+import { CartProvider } from "@/lib/cart";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -32,9 +33,11 @@ export default async function LocaleLayout({
       <NextIntlClientProvider messages={messages}>
         <ThemeProvider>
           <WishlistProvider>
-            {children}
-            <PWAInstallBanner />
-            <VerdyChat />
+            <CartProvider>
+              {children}
+              <PWAInstallBanner />
+              <VerdyChat />
+            </CartProvider>
           </WishlistProvider>
         </ThemeProvider>
       </NextIntlClientProvider>

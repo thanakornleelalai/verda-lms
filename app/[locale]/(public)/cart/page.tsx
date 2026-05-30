@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { Footer } from "@/components/layout/Footer";
 import { Container } from "@/components/layout/Container";
@@ -13,18 +13,18 @@ import { CourseThumbnail } from "@/components/course/CourseThumbnail";
 import { PromptPayQR } from "@/components/payment/PromptPayQR";
 import { MOCK_COURSES } from "@/mock";
 import { formatPrice } from "@/lib/utils";
+import { useCart } from "@/lib/cart";
 import { applyCoupon, checkoutWithStripe, checkoutWithPromptPay, type CartItem, type CheckoutResult } from "@/actions/payment";
 import { Trash2, Tag, CheckCircle, AlertCircle, CreditCard, QrCode, ShoppingBag, Lock } from "lucide-react";
-
-const CART_ITEMS = MOCK_COURSES.slice(0, 2);
 
 type Step = "cart" | "processing" | "qr";
 
 export default function CartPage() {
   const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { items: cartSlugs, add, remove, clear } = useCart();
 
-  const [items, setItems] = useState(CART_ITEMS);
   const [coupon, setCoupon] = useState("");
   const [couponStatus, setCouponStatus] = useState<"idle" | "ok" | "error">("idle");
   const [couponMsg, setCouponMsg] = useState("");
@@ -33,6 +33,21 @@ export default function CartPage() {
   const [step, setStep] = useState<Step>("cart");
   const [error, setError] = useState("");
   const [qrData, setQrData] = useState<CheckoutResult | null>(null);
+
+  // Add course from ?course=slug (from "เพิ่มลงตะกร้า" / wishlist), then clean the URL
+  useEffect(() => {
+    const slug = searchParams.get("course");
+    if (slug && MOCK_COURSES.some((c) => c.slug === slug)) {
+      add(slug);
+      router.replace(`/${locale}/cart`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // Resolve cart slugs → full course objects
+  const items = cartSlugs
+    .map((slug) => MOCK_COURSES.find((c) => c.slug === slug))
+    .filter((c): c is (typeof MOCK_COURSES)[number] => !!c);
 
   const subtotal = items.reduce((s, c) => s + c.price, 0);
   const discount = discountPct > 0 ? Math.round(subtotal * discountPct / 100) : 0;
@@ -80,6 +95,7 @@ export default function CartPage() {
     if (paymentMethod === "card") {
       const result = await checkoutWithStripe(cartItems, couponCode, discountPct);
       if (result.success && result.redirectUrl) {
+        clear(); // empty cart on successful checkout
         router.push(result.redirectUrl);
       } else {
         setError(result.error ?? "เกิดข้อผิดพลาด กรุณาลองใหม่");
@@ -90,6 +106,7 @@ export default function CartPage() {
       if (result.success) {
         setQrData(result);
         setStep("qr");
+        clear(); // cart emptied; PromptPay status polled on QR screen
       } else {
         setError(result.error ?? "ไม่สามารถสร้าง QR Code ได้");
         setStep("cart");
@@ -205,7 +222,7 @@ export default function CartPage() {
                       </div>
                     </div>
                     <button
-                      onClick={() => setItems((prev) => prev.filter((c) => c.id !== course.id))}
+                      onClick={() => remove(course.slug)}
                       className="text-ink-4 hover:text-danger transition-colors self-start mt-1"
                       title="ลบออก"
                     >

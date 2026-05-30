@@ -17,6 +17,7 @@ import { CourseThumbnail } from "@/components/course/CourseThumbnail";
 import { CourseGrid } from "@/components/course/CourseGrid";
 import { CourseReviews } from "@/components/course/CourseReviews";
 import { WishlistButton } from "@/components/course/WishlistButton";
+import { AddToCartButton } from "@/components/course/AddToCartButton";
 import { MOCK_COURSES, MOCK_ENROLLMENTS } from "@/mock";
 import { formatPrice, formatDuration, formatNumber } from "@/lib/utils";
 import { createFreeEnrollment } from "@/actions/enrollment";
@@ -234,16 +235,12 @@ export default async function CourseDetailPage({
                         <div className="font-display text-[36px] text-viridian">
                           {formatPrice(course.price, course.currency)}
                         </div>
-                        <Link href={`/${locale}/cart`}>
+                        <Link href={`/${locale}/cart?course=${course.slug}`}>
                           <Button variant="primary" size="lg" className="w-full justify-center">
                             {t("enroll")}
                           </Button>
                         </Link>
-                        <Link href={`/${locale}/cart?course=${course.slug}`}>
-                          <Button variant="ghost" size="default" className="w-full justify-center">
-                            {t("addToCart")}
-                          </Button>
-                        </Link>
+                        <AddToCartButton slug={course.slug} className="w-full" />
                         <WishlistButton slug={course.slug} className="w-full justify-center" />
                       </>
                     )}
