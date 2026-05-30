@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
-import { Search, ShoppingCart, X, LogOut, LayoutDashboard, Clapperboard, ShieldCheck } from "lucide-react";
+import { Search, ShoppingCart, X, LogOut, LayoutDashboard, Clapperboard, ShieldCheck, Heart } from "lucide-react";
+import { useWishlist } from "@/lib/wishlist";
 import { ThemeCustomizer } from "@/components/theme/ThemeCustomizer";
 import { FontSizeControl } from "@/components/home/FontSizeControl";
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -58,6 +59,7 @@ export function TopBar() {
   const router = useRouter();
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const { count: wishlistCount } = useWishlist();
   const [promoVisible, setPromoVisible] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -257,6 +259,20 @@ export function TopBar() {
               {locale === "th" ? "EN" : "TH"}
             </span>
           </button>
+
+          {/* Wishlist */}
+          <Link
+            href={`/${locale}/dashboard/wishlist`}
+            aria-label="คอร์สที่ถูกใจ"
+            className="relative w-[38px] h-[38px] rounded-full inline-flex items-center justify-center text-ink-2 hover:bg-paper-2 transition-colors"
+          >
+            <Heart size={18} />
+            {wishlistCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center tabular">
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
 
           {/* Cart */}
           <Link

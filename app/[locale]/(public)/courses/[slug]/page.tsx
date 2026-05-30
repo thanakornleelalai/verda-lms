@@ -15,9 +15,12 @@ import { EyebrowLabel } from "@/components/primitives/EyebrowLabel";
 import { Avatar } from "@/components/primitives/Avatar";
 import { CourseThumbnail } from "@/components/course/CourseThumbnail";
 import { CourseGrid } from "@/components/course/CourseGrid";
+import { CourseReviews } from "@/components/course/CourseReviews";
+import { WishlistButton } from "@/components/course/WishlistButton";
 import { MOCK_COURSES, MOCK_ENROLLMENTS } from "@/mock";
 import { formatPrice, formatDuration, formatNumber } from "@/lib/utils";
 import { createFreeEnrollment } from "@/actions/enrollment";
+import { getReviews, getQuestions } from "@/actions/reviews";
 import type { Course } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -241,6 +244,7 @@ export default async function CourseDetailPage({
                             {t("addToCart")}
                           </Button>
                         </Link>
+                        <WishlistButton slug={course.slug} className="w-full justify-center" />
                       </>
                     )}
 
@@ -362,46 +366,12 @@ export default async function CourseDetailPage({
                 </div>
               </section>
 
-              {/* Reviews */}
-              <section>
-                <div className="flex items-center gap-3 mb-5">
-                  <h2 className="font-semibold text-[20px] text-ink">รีวิวจากนักเรียน</h2>
-                  <div className="flex items-center gap-1.5">
-                    <Star size={16} className="fill-gold text-gold" />
-                    <span className="font-semibold text-[16px] text-ink">{course.rating.toFixed(1)}</span>
-                    <span className="text-[13px] text-ink-3">({course.ratingCount.toLocaleString()} รีวิว)</span>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-4">
-                  {[
-                    { name: "สมชาย ดีมาก", rating: 5, date: "12 เม.ย. 2568", body: "คอร์สนี้ดีมากครับ เนื้อหาครอบคลุมและอาจารย์อธิบายได้ชัดเจน เข้าใจง่าย แนะนำสำหรับคนที่เริ่มต้นเลยครับ" },
-                    { name: "วรรณา สุขใจ", rating: 5, date: "3 เม.ย. 2568", body: "เรียนแล้วได้ความรู้จริงๆ ค่ะ โปรเจกต์ท้ายคอร์สทำให้ได้ลองใช้งานจริงด้วย ชอบมากๆ" },
-                    { name: "ธนวัฒน์ พัฒนา", rating: 4, date: "28 มี.ค. 2568", body: "เนื้อหาดีครับ แต่บางบทอาจจะเร็วไปนิด ต้องหยุดดูซ้ำหลายรอบ โดยรวมถือว่าคุ้มค่ามากครับ" },
-                  ].map((review) => (
-                    <div key={review.name} className="bg-paper-3 border border-line rounded-r3 p-5">
-                      <div className="flex items-start justify-between gap-4 mb-3">
-                        <div className="flex items-center gap-3">
-                          <Avatar name={review.name} size="sm" />
-                          <div>
-                            <p className="font-medium text-[14px] text-ink">{review.name}</p>
-                            <p className="text-[11px] text-ink-4 font-mono">{review.date}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-0.5 shrink-0">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star
-                              key={i}
-                              size={13}
-                              className={i < review.rating ? "fill-gold text-gold" : "text-line"}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-[14px] text-ink-2 leading-[1.7] font-thai">{review.body}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
+              {/* Reviews + Q&A */}
+              <CourseReviews
+                courseSlug={course.slug}
+                initialReviews={await getReviews(course.slug)}
+                initialQuestions={await getQuestions(course.slug)}
+              />
             </div>
 
             <div className="hidden lg:block" />

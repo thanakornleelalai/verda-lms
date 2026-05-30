@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { Star, Heart, Users } from "lucide-react";
-import { useState } from "react";
 import { cn, formatPrice, formatNumber } from "@/lib/utils";
 import type { Course } from "@/types";
 import { Tag } from "@/components/primitives/Tag";
 import { CourseThumbnail } from "./CourseThumbnail";
+import { useWishlist } from "@/lib/wishlist";
 
 interface CourseCardProps {
   course: Course;
@@ -19,7 +19,8 @@ interface CourseCardProps {
 
 export function CourseCard({ course, className, showBadge, index = 0 }: CourseCardProps) {
   const locale = useLocale();
-  const [wishlisted, setWishlisted] = useState(false);
+  const { has, toggle } = useWishlist();
+  const wishlisted = has(course.slug);
 
   // Cap the stagger delay at 7 cards so late items don't wait too long
   const delayMs = Math.min(index, 7) * 75;
@@ -143,7 +144,7 @@ export function CourseCard({ course, className, showBadge, index = 0 }: CourseCa
       {/* ── Wishlist button ────────────────────────────────────────── */}
       {/* Sibling of Link so it doesn't trigger Link navigation */}
       <button
-        onClick={() => setWishlisted((w) => !w)}
+        onClick={() => toggle(course.slug)}
         aria-label={wishlisted ? "นำออกจาก Wishlist" : "บันทึกใน Wishlist"}
         className={cn(
           "absolute top-3 right-3 z-30",
