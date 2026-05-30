@@ -2,8 +2,8 @@
 
 > **Platform:** Online Course Marketplace (Thai / English)
 > **Stack:** Next.js 15 · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Vercel
-> **Last updated:** 2026-05-30 (Session 25 — Shopping cart module + .next cache-fix note · all checks green)
-> **Version:** 1.0.0
+> **Last updated:** 2026-05-30 (Session 27 — MVP Final Sprint · Rate Limiting · Drip UI · DnD Reorder · Certificate pdfUrl · Migration · 94%→97%)
+> **Version:** 1.0.1
 
 ---
 
@@ -24,8 +24,9 @@ Phase 9  — Forum / Discussion          █████████████
 Phase 10 — Gamification                █████████████░░░░░░░   65%  ✅ DONE (leaderboard + badges + XP stat card on dashboard)
 Phase 11 — PWA / Mobile                ██████████████████░░   90%  ✅ DONE (manifest.ts + **PWAInstallBanner** component ✅)
 Phase 12 — Multi-tenant                ████░░░░░░░░░░░░░░░░   20%  🔄 Partial (Prisma model done)
-Phase 13 — Deployment & DevOps         ████████████████░░░░   80%  ✅ DONE (vercel.json + CI workflow)
-Phase 14 — Quality & Testing           ████████████████████  100%  ✅ DONE (type-check clean · zero errors)
+Phase 13 — Deployment & DevOps         ██████████████████░░   90%  ✅ DONE (vercel.json + CI workflow + prisma migrations ✅)
+Phase 14 — Quality & Testing           ████████████████████  100%  ✅ DONE (type-check clean · zero errors · 37/37 tests pass)
+Phase 27 — MVP Final Sprint            ████████████████████  100%  ✅ DONE (rate-limit · drip UI · dnd reorder · cert pdfUrl · migration SQL ✅)
 Phase 15 — Core Student Journey        ████████████████████  100%  ✅ DONE (all no-external-service tasks complete)
   └─ S1 Login/Logout                   ████████████████████  100%  ✅ DONE (forgot-pwd ✅ · reset-password ✅ · email-verify ✅ · phone OTP ✅)
   └─ S2 Browse Course                  ████████████████████  100%  ✅ DONE (free-enroll ✅ · enrolled-state ✅ · reviews ✅ · **search suggestions** ✅)
@@ -50,7 +51,7 @@ Phase 15 — Core Student Journey        █████████████
 | Student pages | Dashboard, Lesson Player, Quiz, Cart/Checkout | ✅ Done |
 | Instructor Studio | Layout, Dashboard, Course List, New Course Wizard, Analytics, **Course Editor**, **Students**, **Settings** | ✅ Done |
 | Admin Panel | Layout, Overview, **Users**, **Courses**, **Orders**, **Settings** | ✅ Done |
-| Certificate page | ISR 86400s, PDF download stub | ✅ Done |
+| Certificate page | ISR 86400s, PDF download (HTML print-to-PDF), `pdfUrl` auto-set on issue | ✅ Done |
 | Live Session page | Countdown timer, Zoom embed stub, live chat | ✅ Done |
 | Forum page | Thread list, **optimistic vote buttons** (toggle up/down with viridian highlight), solved status | ✅ Done |
 | Leaderboard page | Rankings + Badges grid | ✅ Done |

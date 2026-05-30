@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { MOCK_COURSES } from "@/mock";
-import { getCertVerifyUrl } from "@/lib/certificate-url";
+import { getCertVerifyUrl, getCertDownloadUrl } from "@/lib/certificate-url";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -43,9 +43,14 @@ export async function issueCertificate(
       return { success: true, certId: existing.id, alreadyExists: true };
     }
 
-    // Create certificate
+    // Create certificate with the download URL pre-populated
     const cert = await db.certificate.create({
       data: { userId, courseId },
+    });
+    // Backfill pdfUrl so dashboard download button has a valid URL immediately
+    await db.certificate.update({
+      where: { id: cert.id },
+      data: { pdfUrl: getCertDownloadUrl(cert.id) },
     });
 
     // Award XP points (100 pts per certificate)
@@ -55,8 +60,8 @@ export async function issueCertificate(
       update: { total: { increment: 100 } },
     });
 
-    // TODO: Send email notification via Resend
-    // await sendCertificateEmail(userId, cert.id, courseId);
+    // Send certificate email notification (no-op when RESEND_API_KEY is unset)
+    await sendCertificateEmail(userId, cert.id, courseId).catch(() => {});
 
     return { success: true, certId: cert.id };
   } catch {

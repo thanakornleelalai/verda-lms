@@ -1,38 +1,18 @@
 import { db } from "@/lib/db";
 import { MOCK_COURSES } from "@/mock";
 import { EyebrowLabel } from "@/components/primitives/EyebrowLabel";
-import { CourseThumbnail } from "@/components/course/CourseThumbnail";
-import { formatNumber, formatPrice } from "@/lib/utils";
+import { CourseListClient, type CourseRow } from "./CourseListClient";
 
 export const dynamic = "force-dynamic";
 
-type CourseRow = {
-  id: string;
-  slug: string;
-  title: string;
-  instructorName: string;
-  status: string;
-  price: number;
-  currency: string;
-  enrollmentCount: number;
-  rating: number;
-  monogram: string | null;
-  art: string | null;
-  updatedAt: string;
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  PUBLISHED: "bg-ok/10 text-ok",
-  DRAFT: "bg-warn/10 text-warn",
-  REVIEW: "bg-sky-400/10 text-sky-600",
-  ARCHIVED: "bg-line text-ink-3",
-};
-
 export default async function AdminCoursesPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ status?: string }>;
 }) {
+  const { locale } = await params;
   const { status: statusFilter = "" } = await searchParams;
 
   let courses: CourseRow[] = [];
@@ -40,7 +20,7 @@ export default async function AdminCoursesPage({
 
   try {
     const dbCourses = await db.course.findMany({
-      orderBy: { updatedAt: "desc" },
+      orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
       take: 100,
       select: {
         id: true,
@@ -94,15 +74,11 @@ export default async function AdminCoursesPage({
   const draft = courses.filter((c) => c.status === "DRAFT").length;
   const review = courses.filter((c) => c.status === "REVIEW").length;
 
-  const filtered = statusFilter
-    ? courses.filter((c) => c.status === statusFilter)
-    : courses;
-
   const STATUS_FILTERS = [
     { label: "ทั้งหมด", value: "", count: courses.length },
+    { label: "รอตรวจสอบ", value: "REVIEW", count: review },
     { label: "เผยแพร่แล้ว", value: "PUBLISHED", count: published },
     { label: "Draft", value: "DRAFT", count: draft },
-    { label: "รอตรวจ", value: "REVIEW", count: review },
   ];
 
   return (
@@ -114,8 +90,19 @@ export default async function AdminCoursesPage({
           <strong className="text-ink">{total}</strong> คอร์สทั้งหมด ·{" "}
           <span className="text-ok">{published} เผยแพร่แล้ว</span> ·{" "}
           <span className="text-warn">{draft} Draft</span>
+          {review > 0 && (
+            <> · <span className="text-sky-600 font-semibold">{review} รอตรวจสอบ</span></>
+          )}
         </p>
       </div>
+
+      {/* Review queue alert */}
+      {review > 0 && (
+        <div className="flex items-center gap-3 mb-5 px-4 py-3 bg-sky-50 border border-sky-200 rounded-r2 text-[13px] text-sky-700">
+          <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse shrink-0" />
+          มี <strong className="mx-1">{review} คอร์ส</strong> รอการตรวจสอบ — กด <strong className="mx-1">อนุมัติ</strong> หรือ <strong className="mx-1">ส่งคืน</strong> ในแต่ละรายการด้านล่าง
+        </div>
+      )}
 
       <div className="flex gap-3 mb-5 flex-wrap">
         {STATUS_FILTERS.map(({ label, value, count }) => (
@@ -125,6 +112,8 @@ export default async function AdminCoursesPage({
             className={`px-4 py-1.5 rounded-pill text-[13px] border transition-colors ${
               statusFilter === value
                 ? "bg-viridian text-white border-viridian"
+                : value === "REVIEW" && count > 0
+                ? "border-sky-300 text-sky-600 hover:bg-sky-50"
                 : "border-line text-ink-3 hover:border-viridian-3 hover:text-ink"
             }`}
           >
@@ -134,42 +123,11 @@ export default async function AdminCoursesPage({
         ))}
       </div>
 
-      <div className="bg-paper-3 border border-line rounded-r3 overflow-hidden">
-        <div className="px-5 py-3 border-b border-line bg-paper-2">
-          <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink-3">
-            {statusFilter ? `${statusFilter} ` : ""}คอร์ส ({filtered.length} รายการที่แสดง)
-          </p>
-        </div>
-        <div className="divide-y divide-line">
-          {filtered.map((course) => (
-            <div key={course.id} className="flex items-center gap-4 px-5 py-4 hover:bg-paper-2 transition-colors">
-              <div className="w-[80px] shrink-0 rounded-r2 overflow-hidden">
-                <CourseThumbnail
-                  title={course.title}
-                  monogram={course.monogram ?? undefined}
-                  art={course.art ?? undefined}
-                  aspectRatio="16/9"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-[14px] text-ink truncate">{course.title}</h3>
-                <p className="text-[12px] text-ink-3 mt-0.5">{course.instructorName}</p>
-                <div className="flex items-center gap-4 mt-2 text-[12px] text-ink-3">
-                  <span><strong className="text-ink">{formatNumber(course.enrollmentCount)}</strong> นักเรียน</span>
-                  <span><strong className="text-ink">{course.rating.toFixed(1)}</strong> ⭐</span>
-                  <span><strong className="text-ink">{formatPrice(course.price, course.currency)}</strong></span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <span className={`font-mono text-[10px] px-2 py-0.5 rounded-pill uppercase tracking-wide ${STATUS_COLORS[course.status] ?? "bg-line text-ink-3"}`}>
-                  {course.status}
-                </span>
-                <span className="font-mono text-[10px] text-ink-4">{course.updatedAt}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <CourseListClient
+        initialCourses={courses}
+        locale={locale}
+        statusFilter={statusFilter}
+      />
     </div>
   );
 }

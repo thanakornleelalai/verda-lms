@@ -368,6 +368,16 @@ export function LessonPlayer({
               allowFullScreen
               title={currentLesson.title}
             />
+          ) : currentLesson.videoAsset?.startsWith("gd:") ? (
+            /* ── Google Drive embed ──────────────────────────────────── */
+            <iframe
+              key={currentLesson.id}
+              src={`https://drive.google.com/file/d/${currentLesson.videoAsset.slice(3)}/preview`}
+              className="w-full h-full"
+              allow="autoplay; encrypted-media; picture-in-picture"
+              allowFullScreen
+              title={currentLesson.title}
+            />
           ) : currentLesson.playbackId ? (
             /* ── Mux video player ────────────────────────────────────── */
             <MuxPlayer

@@ -62,6 +62,91 @@ export async function createCourse(formData: {
   }
 }
 
+export async function createCourseWithCurriculum(
+  formData: {
+    title: string;
+    description: string;
+    categoryId?: string;
+    level: string;
+    language: string;
+    price: number;
+  },
+  sections: Array<{
+    title: string;
+    lessons: Array<{
+      title: string;
+      type: string;
+      videoAsset?: string;
+      content?: string;
+      isFree?: boolean;
+      duration?: number;
+    }>;
+  }>
+): Promise<{ courseId?: string; slug?: string; status?: string; error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  const role = (session.user as { role?: string }).role;
+  if (role !== "INSTRUCTOR" && role !== "ADMIN") return { error: "Forbidden" };
+
+  const baseSlug = slugify(formData.title || "untitled-course");
+
+  try {
+    let slug = baseSlug;
+    let suffix = 0;
+    while (await db.course.findUnique({ where: { slug } })) {
+      suffix++;
+      slug = `${baseSlug}-${suffix}`;
+    }
+
+    // Instructors submit for admin review → status REVIEW (admins skip the queue).
+    const isAdmin = role === "ADMIN";
+    const course = await db.course.create({
+      data: {
+        title: formData.title,
+        description: formData.description,
+        slug,
+        level: formData.level as "BEGINNER" | "INTERMEDIATE" | "ADVANCED",
+        language: formData.language,
+        price: formData.price,
+        status: isAdmin ? "DRAFT" : "REVIEW",
+        instructorId: session.user.id,
+        ...(formData.categoryId ? { categoryId: formData.categoryId } : {}),
+      },
+    });
+
+    // Create sections + their lessons preserving authoring order.
+    for (let si = 0; si < sections.length; si++) {
+      const s = sections[si];
+      const section = await db.section.create({
+        data: { courseId: course.id, title: s.title, order: si + 1 },
+      });
+      for (let li = 0; li < s.lessons.length; li++) {
+        const l = s.lessons[li];
+        await db.lesson.create({
+          data: {
+            sectionId: section.id,
+            title: l.title,
+            type: l.type as "VIDEO" | "TEXT" | "QUIZ" | "LIVE" | "ASSIGNMENT",
+            order: li + 1,
+            isFree: l.isFree ?? false,
+            ...(l.videoAsset ? { videoAsset: l.videoAsset } : {}),
+            ...(l.content ? { content: l.content } : {}),
+            ...(l.duration ? { duration: l.duration } : {}),
+          },
+        });
+      }
+    }
+
+    revalidatePath("/studio/courses");
+    revalidatePath("/admin/courses");
+    return { courseId: course.id, slug: course.slug, status: course.status };
+  } catch {
+    // DB unavailable in dev — surface a soft signal the client can handle.
+    return { error: "DB unavailable" };
+  }
+}
+
 export async function updateCourse(
   courseId: string,
   data: Partial<{
@@ -190,7 +275,9 @@ export async function createLesson(
   sectionId: string,
   courseId: string,
   title: string,
-  type: string = "VIDEO"
+  type: string = "VIDEO",
+  /** Optional normalised video token ("yt:<id>" | "gd:<id>") set on creation. */
+  videoAsset?: string
 ): Promise<{ lessonId?: string; error?: string }> {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
@@ -203,6 +290,7 @@ export async function createLesson(
         title,
         type: type as "VIDEO" | "TEXT" | "QUIZ" | "LIVE" | "ASSIGNMENT",
         order: count + 1,
+        ...(videoAsset ? { videoAsset } : {}),
       },
     });
     revalidatePath(`/studio/courses/${courseId}`);
@@ -243,6 +331,22 @@ export async function updateLesson(
         ...(data.videoAsset !== undefined ? { videoAsset: data.videoAsset } : {}),
       },
     });
+    revalidatePath(`/studio/courses/${courseId}`);
+    return {};
+  } catch {
+    return { error: "DB unavailable" };
+  }
+}
+
+export async function deleteLesson(
+  lessonId: string,
+  courseId: string
+): Promise<{ error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  try {
+    await db.lesson.delete({ where: { id: lessonId } });
     revalidatePath(`/studio/courses/${courseId}`);
     return {};
   } catch {

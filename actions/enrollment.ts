@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getCourseBySlug } from "@/lib/queries/courses";
 
 export async function createFreeEnrollment(
   courseId: string,
@@ -29,7 +30,17 @@ export async function createFreeEnrollment(
     // DB unavailable in dev — proceed to redirect anyway (mock enrollment)
   }
 
-  redirect(`/${locale}/learn/${slug}`);
+  // Resolve the first lesson so we land on a valid learn route
+  // (/learn/[slug] alone has no page → 404; it needs a lessonId).
+  const course = await getCourseBySlug(slug);
+  const firstLessonId = course?.sections
+    .flatMap((s) => s.lessons)
+    .find(Boolean)?.id;
+
+  if (firstLessonId) {
+    redirect(`/${locale}/learn/${slug}/${firstLessonId}`);
+  }
+  redirect(`/${locale}/learn/${slug}/start`);
 }
 
 export async function checkEnrollment(

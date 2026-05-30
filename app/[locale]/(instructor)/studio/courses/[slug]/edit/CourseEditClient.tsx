@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/primitives/Button";
 import {
   updateCourse,
@@ -10,10 +10,29 @@ import {
   createLesson,
   publishCourse,
   unpublishCourse,
+  reorderLessons,
 } from "@/actions/studio";
-import { ChevronDown, ChevronRight, Plus, Video, FileText, ClipboardCheck } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, Video, FileText, ClipboardCheck, Youtube, HardDrive, Link2, GripVertical } from "lucide-react";
 import { CourseThumbnailPicker } from "@/components/studio/CourseThumbnailPicker";
 import { updateCourseThumbnail } from "@/actions/studio";
+import { parseVideoInput, providerLabel } from "@/lib/video-url";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type LessonRow = { id: string; title: string; type: string; isFree: boolean; duration?: number };
 type SectionRow = { id: string; title: string; order: number; lessons: LessonRow[] };
@@ -46,6 +65,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export function CourseEditClient({ course }: { course: CourseData }) {
   const params = useParams();
+  const router = useRouter();
   const locale = (params.locale as string) || "th";
   const courseSlug = (params.slug as string) || "";
   const [status, setStatus] = useState(course.status);
@@ -67,7 +87,32 @@ export function CourseEditClient({ course }: { course: CourseData }) {
   const [newSectionTitle, setNewSectionTitle] = useState("");
   const [addingSection, setAddingSection] = useState(false);
   const [newLessonTitles, setNewLessonTitles] = useState<Record<string, string>>({});
+  const [newLessonTypes, setNewLessonTypes] = useState<Record<string, string>>({});
+  const [newLessonVideoUrls, setNewLessonVideoUrls] = useState<Record<string, string>>({});
   const [addingLessonFor, setAddingLessonFor] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  function handleDragEnd(sectionId: string, event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setSections((prev) =>
+      prev.map((s) => {
+        if (s.id !== sectionId) return s;
+        const oldIdx = s.lessons.findIndex((l) => l.id === active.id);
+        const newIdx = s.lessons.findIndex((l) => l.id === over.id);
+        const reordered = arrayMove(s.lessons, oldIdx, newIdx);
+        // Persist new order to DB (fire-and-forget — optimistic update already done)
+        startTransition(async () => {
+          await reorderLessons(sectionId, course.id, reordered.map((l) => l.id));
+        });
+        return { ...s, lessons: reordered };
+      })
+    );
+  }
 
   function handleSaveMetadata() {
     setMetaError("");
@@ -124,18 +169,35 @@ export function CourseEditClient({ course }: { course: CourseData }) {
   function handleAddLesson(sectionId: string) {
     const title = (newLessonTitles[sectionId] ?? "").trim();
     if (!title) return;
+    const type = newLessonTypes[sectionId] ?? "VIDEO";
+    // For VIDEO lessons, accept a YouTube / Google Drive link pasted inline.
+    const videoToken =
+      type === "VIDEO"
+        ? parseVideoInput(newLessonVideoUrls[sectionId] ?? "")?.token
+        : undefined;
+
     startTransition(async () => {
-      const result = await createLesson(sectionId, course.id, title, "VIDEO");
+      const result = await createLesson(sectionId, course.id, title, type, videoToken);
       if (!result.error && result.lessonId) {
         setSections((prev) =>
           prev.map((s) =>
             s.id === sectionId
-              ? { ...s, lessons: [...s.lessons, { id: result.lessonId!, title, type: "VIDEO", isFree: false }] }
+              ? { ...s, lessons: [...s.lessons, { id: result.lessonId!, title, type, isFree: false }] }
               : s
           )
         );
         setNewLessonTitles((prev) => ({ ...prev, [sectionId]: "" }));
+        setNewLessonVideoUrls((prev) => ({ ...prev, [sectionId]: "" }));
         setAddingLessonFor(null);
+
+        // A video lesson with a link pasted inline is already complete — stay here.
+        // Otherwise open the relevant editor so they can finish the content.
+        if (type === "VIDEO" && videoToken) return;
+        const dest =
+          type === "QUIZ"
+            ? `/${locale}/studio/courses/${courseSlug}/quiz/${result.lessonId}`
+            : `/${locale}/studio/courses/${courseSlug}/lesson/${result.lessonId}`;
+        router.push(dest);
       }
     });
   }
@@ -247,46 +309,79 @@ export function CourseEditClient({ course }: { course: CourseData }) {
 
             {expanded.has(section.id) && (
               <div className="pb-2 bg-paper-2/40">
-                {section.lessons.map((lesson, li) => (
-                  <div key={lesson.id} className="flex items-center gap-3 px-8 py-2.5 border-t border-line/40">
-                    <span className="font-mono text-[10px] text-ink-4 w-4 shrink-0">{li + 1}</span>
-                    {lessonIcon(lesson.type)}
-                    <span className="text-[13px] text-ink flex-1 truncate">{lesson.title}</span>
-                    {lesson.isFree && (
-                      <span className="font-mono text-[9px] text-viridian bg-viridian/10 px-1.5 py-0.5 rounded-pill shrink-0">FREE</span>
-                    )}
-                    {lesson.duration && (
-                      <span className="font-mono text-[10px] text-ink-4 shrink-0">{Math.floor(lesson.duration / 60)}m</span>
-                    )}
-                    {lesson.type === "QUIZ" && (
-                      <Link
-                        href={`/${locale}/studio/courses/${courseSlug}/quiz/${lesson.id}`}
-                        className="font-mono text-[9px] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-pill shrink-0 hover:bg-amber-100 transition-colors"
-                      >
-                        แก้ Quiz
-                      </Link>
-                    )}
-                  </div>
-                ))}
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(section.id, e)}>
+                  <SortableContext items={section.lessons.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+                    {section.lessons.map((lesson, li) => (
+                      <SortableLessonRow key={lesson.id} lesson={lesson} li={li} locale={locale} courseSlug={courseSlug} />
+                    ))}
+                  </SortableContext>
+                </DndContext>
 
                 {addingLessonFor === section.id ? (
-                  <div className="flex items-center gap-2 px-8 py-2.5 border-t border-line/40">
-                    <input
-                      autoFocus
-                      type="text"
-                      className="input-base text-[13px] flex-1 py-1.5"
-                      placeholder="ชื่อบทเรียน..."
-                      value={newLessonTitles[section.id] ?? ""}
-                      onChange={(e) => setNewLessonTitles((prev) => ({ ...prev, [section.id]: e.target.value }))}
-                      onKeyDown={(e) => e.key === "Enter" && handleAddLesson(section.id)}
-                    />
-                    <Button variant="primary" size="sm" onClick={() => handleAddLesson(section.id)} disabled={isPending}>
-                      เพิ่ม
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setAddingLessonFor(null)}>
-                      ยกเลิก
-                    </Button>
-                  </div>
+                  (() => {
+                    const lessonType = newLessonTypes[section.id] ?? "VIDEO";
+                    const videoUrl = newLessonVideoUrls[section.id] ?? "";
+                    const parsed = parseVideoInput(videoUrl);
+                    const urlInvalid = videoUrl.trim().length > 0 && !parsed;
+                    return (
+                      <div className="flex flex-col gap-2 px-8 py-3 border-t border-line/40 bg-viridian-wash/40">
+                        <div className="flex items-center gap-2">
+                          <select
+                            className="input-base text-[13px] py-1.5 w-[110px] shrink-0"
+                            value={lessonType}
+                            onChange={(e) => setNewLessonTypes((prev) => ({ ...prev, [section.id]: e.target.value }))}
+                          >
+                            <option value="VIDEO">วิดีโอ</option>
+                            <option value="ARTICLE">บทความ</option>
+                            <option value="QUIZ">แบบทดสอบ</option>
+                          </select>
+                          <input
+                            autoFocus
+                            type="text"
+                            className="input-base text-[13px] flex-1 py-1.5"
+                            placeholder="ชื่อบทเรียน..."
+                            value={newLessonTitles[section.id] ?? ""}
+                            onChange={(e) => setNewLessonTitles((prev) => ({ ...prev, [section.id]: e.target.value }))}
+                            onKeyDown={(e) => e.key === "Enter" && handleAddLesson(section.id)}
+                          />
+                          <Button variant="primary" size="sm" onClick={() => handleAddLesson(section.id)} disabled={isPending}>
+                            เพิ่ม
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => { setAddingLessonFor(null); setNewLessonVideoUrls((prev) => ({ ...prev, [section.id]: "" })); }}>
+                            ยกเลิก
+                          </Button>
+                        </div>
+
+                        {/* Inline YouTube / Google Drive link — only for video lessons */}
+                        {lessonType === "VIDEO" && (
+                          <div>
+                            <div className="relative">
+                              <Link2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-4" />
+                              <input
+                                type="text"
+                                className="input-base text-[13px] py-1.5 pl-9 w-full"
+                                placeholder="วางลิงก์ YouTube หรือ Google Drive (ไม่บังคับ — เพิ่มภายหลังได้)"
+                                value={videoUrl}
+                                onChange={(e) => setNewLessonVideoUrls((prev) => ({ ...prev, [section.id]: e.target.value }))}
+                                onKeyDown={(e) => e.key === "Enter" && handleAddLesson(section.id)}
+                              />
+                            </div>
+                            {parsed && (
+                              <p className="flex items-center gap-1.5 text-[11px] text-viridian mt-1.5">
+                                {parsed.provider === "youtube" ? <Youtube size={12} /> : <HardDrive size={12} />}
+                                ตรวจพบวิดีโอจาก {providerLabel(parsed.provider)} ✓
+                              </p>
+                            )}
+                            {urlInvalid && (
+                              <p className="text-[11px] text-danger mt-1.5">
+                                ลิงก์ไม่ถูกต้อง — รองรับเฉพาะ YouTube และ Google Drive
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()
                 ) : (
                   <button
                     onClick={() => setAddingLessonFor(section.id)}
@@ -346,6 +441,77 @@ export function CourseEditClient({ course }: { course: CourseData }) {
           {status === "PUBLISHED" ? "ยกเลิกการเผยแพร่" : "เผยแพร่คอร์ส"}
         </Button>
       </div>
+    </div>
+  );
+}
+
+// ── Sortable lesson row (drag-to-reorder) ─────────────────────────────────────
+
+function SortableLessonRow({
+  lesson,
+  li,
+  locale,
+  courseSlug,
+}: {
+  lesson: LessonRow;
+  li: number;
+  locale: string;
+  courseSlug: string;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: lesson.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 10 : undefined,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-3 px-8 py-2.5 border-t border-line/40 bg-paper-2/40"
+    >
+      {/* Drag handle */}
+      <button
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing text-ink-4 hover:text-ink-2 shrink-0 -ml-2 p-1"
+        title="ลากเพื่อเรียงลำดับ"
+        aria-label="ลากเพื่อเรียงลำดับ"
+      >
+        <GripVertical size={14} />
+      </button>
+      <span className="font-mono text-[10px] text-ink-4 w-4 shrink-0">{li + 1}</span>
+      {lessonIcon(lesson.type)}
+      <span className="text-[13px] text-ink flex-1 truncate">{lesson.title}</span>
+      {lesson.isFree && (
+        <span className="font-mono text-[9px] text-viridian bg-viridian/10 px-1.5 py-0.5 rounded-pill shrink-0">
+          FREE
+        </span>
+      )}
+      {lesson.duration && (
+        <span className="font-mono text-[10px] text-ink-4 shrink-0">
+          {Math.floor(lesson.duration / 60)}m
+        </span>
+      )}
+      {lesson.type === "QUIZ" ? (
+        <Link
+          href={`/${locale}/studio/courses/${courseSlug}/quiz/${lesson.id}`}
+          className="font-mono text-[9px] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-pill shrink-0 hover:bg-amber-100 transition-colors"
+        >
+          แก้ Quiz
+        </Link>
+      ) : (
+        <Link
+          href={`/${locale}/studio/courses/${courseSlug}/lesson/${lesson.id}`}
+          className="font-mono text-[9px] text-viridian bg-viridian/10 border border-viridian/20 px-2 py-0.5 rounded-pill shrink-0 hover:bg-viridian/20 transition-colors"
+        >
+          แก้ไข
+        </Link>
+      )}
     </div>
   );
 }

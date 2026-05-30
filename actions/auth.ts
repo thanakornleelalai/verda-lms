@@ -6,6 +6,7 @@ import { signIn } from "@/lib/auth";
 import { storeOtp, checkOtp, consumeOtp, DEV_OTP } from "@/lib/otp-store";
 import { createToken, verifyAndConsumeToken, tokenKey } from "@/lib/tokens";
 import { sendPasswordResetEmail, sendEmailVerificationEmail, sendWelcomeEmail } from "@/lib/resend";
+import { checkRateLimit } from "@/lib/kv";
 
 // ── Phone number helpers ──────────────────────────────────────────────────────
 
@@ -27,6 +28,12 @@ export async function sendOTP(rawPhone: string): Promise<{ success: boolean; err
 
   if (!/^\+66[6-9]\d{8}$/.test(phone)) {
     return { success: false, error: "รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง (ตัวอย่าง: 081-234-5678)" };
+  }
+
+  // Rate limit: max 3 OTP requests per phone per 10 minutes
+  const rl = await checkRateLimit(`otp:signup:${phone}`, 3, 600);
+  if (!rl.allowed) {
+    return { success: false, error: "ขอ OTP บ่อยเกินไป กรุณารอ 10 นาทีแล้วลองใหม่" };
   }
 
   try {
@@ -106,6 +113,12 @@ export async function sendLoginOTP(rawPhone: string): Promise<{ success: boolean
     return { success: false, error: "รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง (ตัวอย่าง: 081-234-5678)" };
   }
 
+  // Rate limit: max 3 OTP requests per phone per 10 minutes
+  const rl = await checkRateLimit(`otp:login:${phone}`, 3, 600);
+  if (!rl.allowed) {
+    return { success: false, error: "ขอ OTP บ่อยเกินไป กรุณารอ 10 นาทีแล้วลองใหม่" };
+  }
+
   // In dev/mock mode always allow; in production verify the account exists
   if (process.env.DATABASE_URL) {
     try {
@@ -170,8 +183,14 @@ export async function registerUser(formData: {
 }): Promise<{ error?: string }> {
   const { name, email, password } = formData;
 
-  if (!name || !email || !password) return { error: "กรุณากรอกข้อมูลให้ครบถ้วน" };
+  if (!name?.trim() || !email?.trim() || !password) return { error: "กรุณากรอกข้อมูลให้ครบถ้วน" };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "รูปแบบอีเมลไม่ถูกต้อง" };
   if (password.length < 8) return { error: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" };
+  if (name.trim().length < 2) return { error: "ชื่อต้องมีอย่างน้อย 2 ตัวอักษร" };
+
+  // Rate limit: max 5 register attempts per email per hour
+  const rl = await checkRateLimit(`register:${email.toLowerCase()}`, 5, 3600);
+  if (!rl.allowed) return { error: "พยายามสมัครสมาชิกบ่อยเกินไป กรุณารอสักครู่" };
 
   try {
     const existing = await db.user.findUnique({ where: { email } });
@@ -191,6 +210,16 @@ export async function loginWithCredentials(formData: {
   email: string;
   password: string;
 }): Promise<{ error?: string }> {
+  if (!formData.email?.trim() || !formData.password) {
+    return { error: "กรุณากรอกอีเมลและรหัสผ่าน" };
+  }
+
+  // Rate limit: max 10 attempts per email per 15 minutes
+  const rl = await checkRateLimit(`login:email:${formData.email.toLowerCase()}`, 10, 900);
+  if (!rl.allowed) {
+    return { error: "พยายามเข้าสู่ระบบบ่อยเกินไป กรุณารอ 15 นาทีแล้วลองใหม่" };
+  }
+
   try {
     await signIn("credentials", { email: formData.email, password: formData.password, redirect: false });
     return {};

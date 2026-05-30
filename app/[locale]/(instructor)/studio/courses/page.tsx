@@ -6,9 +6,35 @@ import { EyebrowLabel } from "@/components/primitives/EyebrowLabel";
 import { CourseThumbnail } from "@/components/course/CourseThumbnail";
 import { MOCK_COURSES, MOCK_INSTRUCTOR } from "@/mock";
 import { formatNumber, formatPrice } from "@/lib/utils";
-import { Plus, ExternalLink } from "lucide-react";
+import { Plus, ExternalLink, Clock, CheckCircle, AlertCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+function StatusBadge({ status }: { status: string }) {
+  if (status === "PUBLISHED")
+    return (
+      <span className="inline-flex items-center gap-1 font-mono text-[10px] px-2.5 py-1 rounded-pill tracking-wide uppercase bg-ok/10 text-ok">
+        <CheckCircle size={10} /> เผยแพร่แล้ว
+      </span>
+    );
+  if (status === "REVIEW")
+    return (
+      <span className="inline-flex items-center gap-1 font-mono text-[10px] px-2.5 py-1 rounded-pill tracking-wide uppercase bg-sky-100 text-sky-600">
+        <Clock size={10} /> รอตรวจสอบ
+      </span>
+    );
+  if (status === "DRAFT")
+    return (
+      <span className="inline-flex items-center gap-1 font-mono text-[10px] px-2.5 py-1 rounded-pill tracking-wide uppercase bg-warn/10 text-warn">
+        <AlertCircle size={10} /> Draft
+      </span>
+    );
+  return (
+    <span className="font-mono text-[10px] px-2.5 py-1 rounded-pill tracking-wide uppercase bg-line text-ink-3">
+      {status}
+    </span>
+  );
+}
 
 export default async function StudioCoursesPage({
   params,
@@ -90,6 +116,16 @@ export default async function StudioCoursesPage({
         </Link>
       </div>
 
+      {/* Review-queue banner */}
+      {courses.some((c) => c.status === "REVIEW") && (
+        <div className="flex items-center gap-3 mb-5 px-4 py-3 bg-sky-50 border border-sky-200 rounded-r2 text-[13px] text-sky-700">
+          <Clock size={15} className="shrink-0" />
+          <span>
+            คุณมี <strong>{courses.filter((c) => c.status === "REVIEW").length} คอร์ส</strong> ที่กำลังรอแอดมินตรวจสอบ — จะได้รับการแจ้งเตือนเมื่ออนุมัติเผยแพร่
+          </span>
+        </div>
+      )}
+
       {courses.length === 0 ? (
         <div className="text-center py-20 border border-dashed border-line rounded-r3">
           <p className="text-ink-3 text-[15px] mb-4">ยังไม่มีคอร์ส</p>
@@ -121,17 +157,7 @@ export default async function StudioCoursesPage({
                     <h3 className="font-semibold text-[16px] text-ink line-clamp-1">{course.title}</h3>
                     <p className="text-[13px] text-ink-3 mt-1 line-clamp-2">{course.description}</p>
                   </div>
-                  <span
-                    className={`shrink-0 font-mono text-[10px] px-2.5 py-1 rounded-pill tracking-wide uppercase ${
-                      course.status === "PUBLISHED"
-                        ? "bg-ok/10 text-ok"
-                        : course.status === "DRAFT"
-                        ? "bg-warn/10 text-warn"
-                        : "bg-line text-ink-3"
-                    }`}
-                  >
-                    {course.status}
-                  </span>
+                  <StatusBadge status={course.status} />
                 </div>
                 <div className="flex items-center gap-6 mt-4 text-[13px] text-ink-3">
                   <span>
@@ -149,6 +175,11 @@ export default async function StudioCoursesPage({
                 </div>
               </div>
               <div className="flex flex-col gap-2 shrink-0">
+                {course.status === "REVIEW" ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-r2 bg-sky-50 border border-sky-200 text-sky-600 text-[12px] font-medium whitespace-nowrap">
+                    <Clock size={12} /> รอแอดมินตรวจ
+                  </div>
+                ) : null}
                 <Link href={`courses/${course.slug}/edit`}>
                   <Button variant="ghost" size="sm">
                     แก้ไข

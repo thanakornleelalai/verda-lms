@@ -149,7 +149,9 @@ export function QuizRunner({
         maxAttempts={maxAttempts}
         nextLessonId={nextLessonId}
         onRetry={handleRetry}
-        onBack={() => router.push(`/${locale}/learn/${slug}`)}
+        onBack={() =>
+          router.push(`/${locale}/learn/${slug}/${nextLessonId ?? "start"}`)
+        }
         onContinue={() =>
           nextLessonId
             ? router.push(`/${locale}/learn/${slug}/${nextLessonId}`)

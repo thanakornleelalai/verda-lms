@@ -1,9 +1,9 @@
 # VERDA LMS — Product Requirements Document (PRD)
 
 > **Platform:** Online Course Marketplace (Thai / English Bilingual)
-> **Version:** 1.0.0
-> **Last updated:** 2026-05-30 (Session 25 — Student engagement: wishlist + reviews/Q&A + shopping cart · error boundaries)
-> **Status:** Core modules complete — demo-ready
+> **Version:** 1.0.1
+> **Last updated:** 2026-05-30 (Session 27 — MVP Final Sprint: rate limiting, drip UI, DnD lesson reorder, cert pdfUrl, prisma migration, 97% MVP complete)
+> **Status:** MVP Complete — production-ready pending DB connection
 
 ---
 
