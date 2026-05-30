@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
-import { Search, ShoppingCart, X, LogOut, LayoutDashboard, Clapperboard, ShieldCheck, Heart } from "lucide-react";
+import { Search, ShoppingCart, X, LogOut, LayoutDashboard, Clapperboard, ShieldCheck, Heart, MessageSquare } from "lucide-react";
 import { useWishlist } from "@/lib/wishlist";
 import { useCart } from "@/lib/cart";
 import { ThemeCustomizer } from "@/components/theme/ThemeCustomizer";
@@ -183,13 +183,20 @@ export function TopBar() {
           </span>
         </Link>
 
-        {/* Nav links */}
-        <nav className="flex items-center gap-[22px] text-[14px] text-ink-2">
+        {/* Desktop nav links */}
+        <nav className="hidden md:flex items-center gap-[22px] text-[14px] text-ink-2">
           <Link href={`/${locale}/courses`} className="hover:text-viridian transition-colors">
             {t("nav.browse")}
           </Link>
           <Link href={`/${locale}/instructors`} className="hover:text-viridian transition-colors">
             {t("nav.instructors")}
+          </Link>
+          <Link
+            href={`/${locale}/forum`}
+            className="flex items-center gap-1.5 hover:text-viridian transition-colors"
+          >
+            <MessageSquare size={14} />
+            {t("nav.webboard")}
           </Link>
           <Link href={`/${locale}/pricing`} className="hover:text-viridian transition-colors">
             {t("nav.pricing")}
@@ -384,6 +391,22 @@ export function TopBar() {
           )}
         </div>
       </Container>
+
+      {/* Mobile nav — visible on small screens only */}
+      <div className="md:hidden border-t border-line bg-paper px-4 py-2 flex items-center justify-around text-[12px] text-ink-3">
+        <Link href={`/${locale}/courses`} className="flex flex-col items-center gap-0.5 hover:text-viridian transition-colors">
+          <Search size={17} />
+          <span>{t("nav.browse")}</span>
+        </Link>
+        <Link href={`/${locale}/forum`} className="flex flex-col items-center gap-0.5 hover:text-viridian transition-colors font-medium text-viridian">
+          <MessageSquare size={17} />
+          <span>{t("nav.webboard")}</span>
+        </Link>
+        <Link href={`/${locale}/pricing`} className="flex flex-col items-center gap-0.5 hover:text-viridian transition-colors">
+          <span className="text-[16px] leading-none">฿</span>
+          <span>{t("nav.pricing")}</span>
+        </Link>
+      </div>
     </header>
   );
 }
