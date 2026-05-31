@@ -11,13 +11,23 @@ import { Button } from "@/components/primitives/Button";
 import { EyebrowLabel } from "@/components/primitives/EyebrowLabel";
 import { CourseThumbnail } from "@/components/course/CourseThumbnail";
 import { PromptPayQR } from "@/components/payment/PromptPayQR";
-import { MOCK_COURSES } from "@/mock";
 import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 import { applyCoupon, checkoutWithStripe, checkoutWithPromptPay, type CartItem, type CheckoutResult } from "@/actions/payment";
-import { Trash2, Tag, CheckCircle, AlertCircle, CreditCard, QrCode, ShoppingBag, Lock } from "lucide-react";
+import { Trash2, Tag, CheckCircle, AlertCircle, CreditCard, QrCode, ShoppingBag, Lock, Loader2 } from "lucide-react";
 
 type Step = "cart" | "processing" | "qr";
+
+type CartCourse = {
+  id: string;
+  slug: string;
+  title: string;
+  price: number;
+  currency: string;
+  monogram: string | null;
+  art: string | null;
+  instructorName: string;
+};
 
 export default function CartPage() {
   return (
@@ -42,20 +52,32 @@ function CartPageInner() {
   const [error, setError] = useState("");
   const [qrData, setQrData] = useState<CheckoutResult | null>(null);
 
-  // Add course from ?course=slug (from "เพิ่มลงตะกร้า" / wishlist), then clean the URL
+  const [items, setItems] = useState<CartCourse[]>([]);
+  const [loadingItems, setLoadingItems] = useState(true);
+
+  // Add course from ?course=slug (from "เพิ่มลงตะกร้า" / wishlist), then clean the URL.
+  // No mock guard — any slug is accepted; resolution happens via the DB-backed API.
   useEffect(() => {
     const slug = searchParams.get("course");
-    if (slug && MOCK_COURSES.some((c) => c.slug === slug)) {
+    if (slug) {
       add(slug);
       router.replace(`/${locale}/cart`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // Resolve cart slugs → full course objects
-  const items = cartSlugs
-    .map((slug) => MOCK_COURSES.find((c) => c.slug === slug))
-    .filter((c): c is (typeof MOCK_COURSES)[number] => !!c);
+  // Resolve cart slugs → full course objects via DB-backed API (works for all courses)
+  useEffect(() => {
+    if (cartSlugs.length === 0) { setItems([]); setLoadingItems(false); return; }
+    let cancelled = false;
+    setLoadingItems(true);
+    fetch(`/api/courses/by-slugs?slugs=${encodeURIComponent(cartSlugs.join(","))}`)
+      .then((r) => r.json())
+      .then((data) => { if (!cancelled) setItems(Array.isArray(data.courses) ? data.courses : []); })
+      .catch(() => { if (!cancelled) setItems([]); })
+      .finally(() => { if (!cancelled) setLoadingItems(false); });
+    return () => { cancelled = true; };
+  }, [cartSlugs]);
 
   const subtotal = items.reduce((s, c) => s + c.price, 0);
   const discount = discountPct > 0 ? Math.round(subtotal * discountPct / 100) : 0;
@@ -184,7 +206,12 @@ function CartPageInner() {
             ตะกร้าสินค้า
           </h1>
 
-          {items.length === 0 ? (
+          {loadingItems && cartSlugs.length > 0 ? (
+            <div className="text-center py-16">
+              <Loader2 size={32} className="text-viridian mx-auto mb-3 animate-spin" />
+              <p className="text-ink-3 text-[14px]">กำลังโหลดตะกร้า...</p>
+            </div>
+          ) : items.length === 0 ? (
             <div className="text-center py-16">
               <ShoppingBag size={48} className="text-ink-4 mx-auto mb-4" />
               <p className="text-ink-3 text-[15px] mb-4">ตะกร้าของคุณว่างเปล่า</p>
@@ -205,8 +232,8 @@ function CartPageInner() {
                     <div className="w-[110px] shrink-0 rounded-r2 overflow-hidden">
                       <CourseThumbnail
                         title={course.title}
-                        monogram={course.monogram}
-                        art={course.art}
+                        monogram={course.monogram ?? undefined}
+                        art={course.art ?? undefined}
                         aspectRatio="16/9"
                       />
                     </div>
@@ -217,7 +244,7 @@ function CartPageInner() {
                       >
                         {course.title}
                       </Link>
-                      <p className="text-[12px] text-ink-3 mt-1">{course.instructor.name}</p>
+                      <p className="text-[12px] text-ink-3 mt-1">{course.instructorName}</p>
                       <div className="flex items-center gap-3 mt-2">
                         <span className="font-display text-[20px] text-viridian">
                           {formatPrice(course.price, course.currency)}
