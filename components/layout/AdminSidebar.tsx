@@ -73,7 +73,10 @@ export function AdminSidebar() {
         </div>
         <Link
           href={`/${locale}`}
+          target="_blank"
+          rel="noopener noreferrer"
           className="flex items-center gap-2 px-3 py-2 text-[13px] text-ink-3 hover:text-ink transition-colors rounded-r2"
+          title="เปิดหน้าเว็บในแท็บใหม่ (ไม่ออกจากระบบ)"
         >
           <ExternalLink size={13} />
           ดูหน้าเว็บ

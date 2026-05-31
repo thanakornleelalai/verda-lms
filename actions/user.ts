@@ -214,6 +214,43 @@ export async function adminSetUserSuspended(
   }
 }
 
+// ── Admin: Reset User Password ──────────────────────────────────────────────────
+
+/**
+ * Admin sets a new password for a STUDENT or INSTRUCTOR account.
+ * Cannot target other admins.
+ */
+export async function adminResetUserPassword(
+  targetUserId: string,
+  newPassword: string,
+): Promise<ActionResult> {
+  const adminId = await requireUserId();
+  if (!adminId) return { success: false, error: "Unauthorized" };
+
+  if (!newPassword || newPassword.length < 8) {
+    return { success: false, error: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" };
+  }
+
+  try {
+    const admin = await db.user.findUnique({ where: { id: adminId }, select: { role: true } });
+    if (!admin || !["ADMIN", "SUPERADMIN"].includes(admin.role)) {
+      return { success: false, error: "ไม่มีสิทธิ์ดำเนินการ" };
+    }
+
+    const target = await db.user.findUnique({ where: { id: targetUserId }, select: { role: true } });
+    if (!target) return { success: false, error: "ไม่พบผู้ใช้" };
+    if (["ADMIN", "SUPERADMIN"].includes(target.role)) {
+      return { success: false, error: "ไม่สามารถตั้งรหัสผ่านให้บัญชีผู้ดูแลระบบได้" };
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await db.user.update({ where: { id: targetUserId }, data: { passwordHash } });
+    return { success: true };
+  } catch {
+    return { success: false, error: "ไม่สามารถตั้งรหัสผ่านได้" };
+  }
+}
+
 // ── Admin: Delete User ───────────────────────────────────────────────────────
 
 export async function adminDeleteUser(targetUserId: string): Promise<ActionResult> {
