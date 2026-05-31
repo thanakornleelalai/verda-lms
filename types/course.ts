@@ -22,6 +22,8 @@ export interface Course {
   rating: number;
   ratingCount: number;
   tags: string[];
+  /** "สิ่งที่คุณจะได้เรียนรู้" bullet points */
+  outcomes?: string[];
   publishedAt?: string;
   updatedAt: string;
   /** CSS gradient art + monogram for thumbnail placeholder */

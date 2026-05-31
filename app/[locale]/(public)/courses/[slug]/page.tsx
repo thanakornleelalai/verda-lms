@@ -276,25 +276,27 @@ export default async function CourseDetailPage({
         <Container className="py-12">
           <div className="grid grid-cols-[1fr_340px] gap-12">
             <div className="flex flex-col gap-10">
-              {/* What you'll learn */}
-              <section>
-                <h2 className="font-semibold text-[20px] text-ink mb-4">สิ่งที่คุณจะได้เรียนรู้</h2>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {[
-                    "กระบวนการ UX Research ตั้งแต่ต้นจนจบ",
-                    "ออกแบบ Wireframe และ Prototype ด้วย Figma",
-                    "สร้าง Design System และ Component Library",
-                    "ทำ Usability Testing กับผู้ใช้จริง",
-                    "Handoff งานให้ Developer อย่างมืออาชีพ",
-                    "สร้าง Portfolio ที่ได้งานจริง",
-                  ].map((item) => (
-                    <div key={item} className="flex items-start gap-2 text-[14px] text-ink">
-                      <CheckCircle size={15} className="text-ok mt-0.5 shrink-0" />
-                      {item}
+              {/* What you'll learn — per-course outcomes (fallback to section titles) */}
+              {(() => {
+                const outcomes =
+                  course.outcomes && course.outcomes.length > 0
+                    ? course.outcomes
+                    : course.sections.map((s) => s.title);
+                if (outcomes.length === 0) return null;
+                return (
+                  <section>
+                    <h2 className="font-semibold text-[20px] text-ink mb-4">สิ่งที่คุณจะได้เรียนรู้</h2>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {outcomes.map((item) => (
+                        <div key={item} className="flex items-start gap-2 text-[14px] text-ink">
+                          <CheckCircle size={15} className="text-ok mt-0.5 shrink-0" />
+                          {item}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </section>
+                  </section>
+                );
+              })()}
 
               {/* Curriculum */}
               <section>

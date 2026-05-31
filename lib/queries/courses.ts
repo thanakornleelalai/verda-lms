@@ -111,6 +111,7 @@ function adaptDbCourse(c: DbCourse): Course {
     rating: c.rating,
     ratingCount: c.ratingCount,
     tags: c.tags,
+    outcomes: c.outcomes ?? [],
     publishedAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
     art: c.art ?? undefined,

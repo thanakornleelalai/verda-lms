@@ -160,6 +160,7 @@ model Course {
   status          CourseStatus @default(DRAFT)
   language        String       @default("th")
   tags            String[]
+  outcomes        String[]     @default([]) // "สิ่งที่คุณจะได้เรียนรู้" — bullet points
   totalDuration   Int          @default(0) // seconds
   rating          Float        @default(0)
   ratingCount     Int          @default(0)

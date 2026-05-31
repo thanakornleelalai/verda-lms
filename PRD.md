@@ -1,9 +1,21 @@
 # VERDA LMS — Product Requirements Document (PRD)
 
 > **Platform:** Online Course Marketplace (Thai / English Bilingual)
-> **Version:** 1.1.0
-> **Last updated:** 2026-05-31 (Session 28 — Instructor Signup Flow: become-instructor page, application form, admin review panel)
+> **Version:** 1.2.0
+> **Last updated:** 2026-05-31 (Session 30 — Per-course outcomes, all-category catalog, ML Andrew Ng course, payment→enroll fix)
 > **Status:** Production Live — Supabase connected, Vercel deployed
+
+### Course Catalog (ครบ 5 หมวดที่เปิดสอน)
+
+| คอร์ส | หมวด | ผู้สอน | บทเรียน |
+|-------|------|--------|---------|
+| UX Design & Figma Masterclass | UX/UI Design | คุณพิมพ์พร วัฒนากร | 8 |
+| Machine Learning Specialization | AI & Data | Andrew Ng | 44 (41 วิดีโอจาก playlist จริง + 3 quiz) |
+| Next.js 15 Fullstack Bootcamp | Web Development | คุณพิมพ์พร วัฒนากร | 5 |
+| Digital Marketing & Meta Ads Masterclass | Digital Marketing | คุณพิมพ์พร วัฒนากร | 4 |
+| การวางแผนการเงินสำหรับฟรีแลนซ์ | Business | คุณพิมพ์พร วัฒนากร | 4 |
+
+> **หมายเหตุ:** ลบคอร์ส "Machine Learning Specialization" เดิม (ของคุณพิมพ์พร) ออก เหลือฉบับ Andrew Ng ฉบับเดียว · เปลี่ยนชื่อผู้สอน คุณพิมพ์ชนก → คุณพิมพ์พร วัฒนากร · "สิ่งที่คุณจะได้เรียนรู้" (Course.outcomes) แยกตามคอร์สแล้ว (ไม่ hardcode UX อีกต่อไป)
 
 ---
 
