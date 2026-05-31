@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff, ChevronDown, ChevronUp, Phone, Mail, Loader2, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, ChevronDown, ChevronUp, Phone, Mail, Loader2, ArrowLeft, GraduationCap, ShieldCheck, BookOpen, ChevronRight, Sparkles } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { registerUser, sendOTP, verifyOTP, registerWithPhone, sendLoginOTP, loginWithPhone, loginWithPhonePassword } from "@/actions/auth";
 import { Button } from "@/components/primitives/Button";
 
-type Mode = "login" | "signup";
+type Mode = "login" | "student" | "instructor";
 
 // Production test accounts — Supabase DB (seeded)
 const DEV_ACCOUNTS = [
@@ -63,10 +63,20 @@ function DevHint() {
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
-  const initialMode = searchParams.get("tab") === "signup" ? "signup" : "login";
+  const tab = searchParams.get("tab");
+  const initialMode: Mode =
+    tab === "instructor" ? "instructor" :
+    tab === "signup" || tab === "student" ? "student" :
+    "login";
   const [mode, setMode] = useState<Mode>(initialMode);
   const locale = useLocale();
   const t = useTranslations("auth");
+
+  const TABS: { id: Mode; label: string }[] = [
+    { id: "login", label: "เข้าสู่ระบบ" },
+    { id: "student", label: "สมัครเรียน" },
+    { id: "instructor", label: "สมัครเป็นผู้สอน" },
+  ];
 
   return (
     <div className="min-h-screen bg-paper flex items-center justify-center p-4">
@@ -88,72 +98,129 @@ export default function LoginPage() {
 
         {/* Card */}
         <div className="bg-paper-3 border border-line rounded-r4 p-[40px]">
-          {/* Tabs */}
-          <div className="flex border border-line rounded-pill p-1 mb-8">
-            {(["login", "signup"] as Mode[]).map((m) => (
+          {/* Tabs — 3 ช่อง: เข้าสู่ระบบ / สมัครเรียน / สมัครเป็นผู้สอน */}
+          <div className="flex border border-line rounded-pill p-1 mb-8 gap-0.5">
+            {TABS.map((tabItem) => (
               <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`flex-1 py-2 rounded-pill text-[14px] font-medium transition-all ${
-                  mode === m
+                key={tabItem.id}
+                onClick={() => setMode(tabItem.id)}
+                className={`flex-1 py-2 rounded-pill text-[12.5px] font-medium transition-all whitespace-nowrap ${
+                  mode === tabItem.id
                     ? "bg-viridian text-[#F5F0E1]"
                     : "text-ink-3 hover:text-ink"
                 }`}
               >
-                {m === "login" ? t("login.title") : t("signup.title")}
+                {tabItem.label}
               </button>
             ))}
           </div>
 
-          {mode === "login" ? (
-            <LoginForm locale={locale} />
-          ) : (
-            <SignupForm locale={locale} />
+          {mode === "login" && <LoginForm locale={locale} />}
+          {mode === "student" && <SignupForm locale={locale} />}
+          {mode === "instructor" && <InstructorSignupPanel locale={locale} />}
+
+          {/* OAuth — แสดงเฉพาะ login + สมัครเรียน (ผู้สอนต้องผ่านใบสมัคร) */}
+          {mode !== "instructor" && (
+            <>
+              <div className="relative my-6">
+                <hr className="border-line" />
+                <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-paper-3 px-3 text-[12px] text-ink-3 font-mono uppercase tracking-wider">
+                  {mode === "login" ? t("login.orWith") : "หรือ"}
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => signIn("google", { callbackUrl: `/${locale}/redirect` })}
+                  className="w-full flex items-center justify-center gap-3 border border-line rounded-pill py-[10px] text-[14px] text-ink hover:bg-paper-2 transition-colors"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  {t("google")}
+                </button>
+                <button
+                  onClick={() => signIn("line", { callbackUrl: `/${locale}/redirect` })}
+                  className="w-full flex items-center justify-center gap-3 border border-line rounded-pill py-[10px] text-[14px] text-ink hover:bg-paper-2 transition-colors"
+                >
+                  <span className="text-[#06C755] font-bold text-[18px]">L</span>
+                  {t("line")}
+                </button>
+              </div>
+            </>
           )}
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <hr className="border-line" />
-            <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-paper-3 px-3 text-[12px] text-ink-3 font-mono uppercase tracking-wider">
-              {mode === "login" ? t("login.orWith") : "หรือ"}
-            </span>
-          </div>
-
-          {/* OAuth */}
-          <div className="flex flex-col gap-2">
-            <button
-              onClick={() => signIn("google", { callbackUrl: `/${locale}/redirect` })}
-              className="w-full flex items-center justify-center gap-3 border border-line rounded-pill py-[10px] text-[14px] text-ink hover:bg-paper-2 transition-colors"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              {t("google")}
-            </button>
-            <button
-              onClick={() => signIn("line", { callbackUrl: `/${locale}/redirect` })}
-              className="w-full flex items-center justify-center gap-3 border border-line rounded-pill py-[10px] text-[14px] text-ink hover:bg-paper-2 transition-colors"
-            >
-              <span className="text-[#06C755] font-bold text-[18px]">L</span>
-              {t("line")}
-            </button>
-          </div>
         </div>
 
         {/* Bottom link */}
         <p className="text-center text-[13px] text-ink-3 mt-6">
-          {mode === "login" ? "ยังไม่มีบัญชี?" : "มีบัญชีแล้ว?"}{" "}
-          <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-viridian hover:underline">
-            {mode === "login" ? t("signup.title") : t("login.title")}
-          </button>
+          {mode === "login" ? (
+            <>ยังไม่มีบัญชี?{" "}
+              <button onClick={() => setMode("student")} className="text-viridian hover:underline">สมัครเรียน</button>
+              {" · "}
+              <button onClick={() => setMode("instructor")} className="text-viridian hover:underline">สมัครเป็นผู้สอน</button>
+            </>
+          ) : (
+            <>มีบัญชีแล้ว?{" "}
+              <button onClick={() => setMode("login")} className="text-viridian hover:underline">เข้าสู่ระบบ</button>
+            </>
+          )}
         </p>
 
         {/* Dev mode test accounts hint */}
         <DevHint />
       </div>
+    </div>
+  );
+}
+
+// ── Instructor signup panel — routes to the full application flow ──────────────
+
+function InstructorSignupPanel({ locale }: { locale: string }) {
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="text-center">
+        <div className="w-14 h-14 rounded-full bg-viridian/10 flex items-center justify-center mx-auto mb-3">
+          <GraduationCap size={26} className="text-viridian" />
+        </div>
+        <h3 className="font-display text-[22px] text-ink tracking-[-0.01em] mb-1.5">
+          สมัครเป็นผู้สอน
+        </h3>
+        <p className="text-[13px] text-ink-3 leading-relaxed">
+          แบ่งปันความรู้ สร้างรายได้ และสร้างแบรนด์ส่วนตัวบน VERDA
+          การสมัครผู้สอนต้องกรอกประวัติและผ่านการอนุมัติจากทีมงาน
+        </p>
+      </div>
+
+      {/* Steps */}
+      <div className="bg-viridian-wash border border-viridian-3/30 rounded-r3 p-4 flex flex-col gap-2.5">
+        {[
+          "กรอกประวัติ ประสบการณ์ และไอเดียคอร์ส",
+          "ทีม VERDA ตรวจสอบภายใน 3–5 วันทำการ",
+          "เมื่ออนุมัติ — เปิด Instructor Studio ทันที",
+        ].map((step, i) => (
+          <div key={i} className="flex items-start gap-2.5">
+            <span className="w-5 h-5 rounded-full bg-viridian text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+              {i + 1}
+            </span>
+            <span className="text-[13px] text-ink-2 font-thai">{step}</span>
+          </div>
+        ))}
+      </div>
+
+      <Link href={`/${locale}/become-instructor`}>
+        <Button variant="primary" size="lg" className="w-full justify-center gap-2">
+          <Sparkles size={16} /> เริ่มกรอกใบสมัครผู้สอน
+          <ChevronRight size={16} />
+        </Button>
+      </Link>
+
+      <p className="text-center text-[12px] text-ink-4">
+        ต้องการเรียนอย่างเดียว?{" "}
+        <span className="text-viridian">เลือกแท็บ &ldquo;สมัครเรียน&rdquo; ด้านบน</span>
+      </p>
     </div>
   );
 }
@@ -489,12 +556,53 @@ function PhoneLoginForm({ locale, onSwitchToPassword }: { locale: string; onSwit
 
 // ── LoginForm wrapper — toggles Email / Phone ──────────────────────────────────
 
+type LoginRole = "student" | "instructor" | "admin";
+
+const LOGIN_ROLES: { id: LoginRole; label: string; icon: typeof BookOpen; dest: string }[] = [
+  { id: "student",    label: "นักเรียน",  icon: BookOpen,      dest: "แดชบอร์ดผู้เรียน" },
+  { id: "instructor", label: "ผู้สอน",     icon: GraduationCap, dest: "Instructor Studio" },
+  { id: "admin",      label: "ผู้ดูแล",    icon: ShieldCheck,   dest: "Admin Panel" },
+];
+
 function LoginForm({ locale }: { locale: string }) {
   const [method, setMethod] = useState<"email" | "phone">("email");
   const [phoneMode, setPhoneMode] = useState<"password" | "otp">("password");
+  const [role, setRole] = useState<LoginRole>("student");
+
+  const activeRole = LOGIN_ROLES.find((r) => r.id === role)!;
 
   return (
     <div className="flex flex-col gap-5">
+      {/* Role selector — เลือกบทบาทที่จะเข้าสู่ระบบ */}
+      <div>
+        <p className="text-[12px] font-medium text-ink-3 mb-2">เข้าสู่ระบบในฐานะ</p>
+        <div className="grid grid-cols-3 gap-2">
+          {LOGIN_ROLES.map((r) => {
+            const Icon = r.icon;
+            const active = role === r.id;
+            return (
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => setRole(r.id)}
+                className={`flex flex-col items-center gap-1.5 py-3 rounded-r2 border transition-all ${
+                  active
+                    ? "border-viridian bg-viridian-wash text-viridian"
+                    : "border-line text-ink-3 hover:border-ink-4"
+                }`}
+              >
+                <Icon size={18} className={active ? "text-viridian" : "text-ink-4"} />
+                <span className="text-[12px] font-medium">{r.label}</span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[11px] text-ink-4 mt-2 flex items-center gap-1">
+          <ChevronRight size={11} className="text-viridian shrink-0" />
+          หลังเข้าสู่ระบบจะนำคุณไปยัง <strong className="text-ink-3 mx-0.5">{activeRole.dest}</strong> โดยอัตโนมัติ
+        </p>
+      </div>
+
       {/* Method toggle */}
       <div className="flex border border-line rounded-pill p-1 gap-1">
         <button
@@ -916,6 +1024,17 @@ function SignupForm({ locale }: { locale: string }) {
 
   return (
     <div className="flex flex-col gap-5">
+      {/* Student signup header */}
+      <div className="flex items-center gap-3 bg-viridian-wash border border-viridian-3/30 rounded-r2 px-4 py-3">
+        <div className="w-9 h-9 rounded-full bg-viridian/10 flex items-center justify-center shrink-0">
+          <BookOpen size={16} className="text-viridian" />
+        </div>
+        <div>
+          <p className="text-[13px] font-semibold text-ink">สมัครเป็นนักเรียน</p>
+          <p className="text-[11px] text-ink-3">เข้าเรียนคอร์ส ทำแบบทดสอบ และรับใบประกาศนียบัตร</p>
+        </div>
+      </div>
+
       {/* Method toggle */}
       <div className="flex border border-line rounded-pill p-1 gap-1">
         <button
