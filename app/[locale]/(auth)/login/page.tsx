@@ -6,7 +6,7 @@ import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, ChevronDown, ChevronUp, Phone, Mail, Loader2, ArrowLeft, GraduationCap, ShieldCheck, BookOpen, ChevronRight, Sparkles } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { registerUser, sendOTP, verifyOTP, registerWithPhone, sendLoginOTP, loginWithPhone, loginWithPhonePassword } from "@/actions/auth";
+import { registerUser, sendOTP, verifyOTP, registerWithPhone, sendLoginOTP, loginWithPhone, loginWithPhonePassword, loginWithRole } from "@/actions/auth";
 import { Button } from "@/components/primitives/Button";
 
 type Mode = "login" | "student" | "instructor";
@@ -227,7 +227,7 @@ function InstructorSignupPanel({ locale }: { locale: string }) {
 
 // ── Email Login ────────────────────────────────────────────────────────────────
 
-function EmailLoginForm({ locale }: { locale: string }) {
+function EmailLoginForm({ locale, role }: { locale: string; role: "student" | "instructor" | "admin" }) {
   const t = useTranslations("auth.login");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -240,9 +240,10 @@ function EmailLoginForm({ locale }: { locale: string }) {
     e.preventDefault();
     setError("");
     startTransition(async () => {
-      const result = await signIn("credentials", { email, password, redirect: false });
-      if (result?.error) {
-        setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+      // Enforce 1 user = 1 role: account's role must match the selected portal
+      const result = await loginWithRole({ email, password, role });
+      if (result.error) {
+        setError(result.error);
       } else {
         router.push(`/${locale}/redirect`);
         router.refresh();
@@ -573,33 +574,29 @@ function LoginForm({ locale }: { locale: string }) {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Role selector — เลือกบทบาทที่จะเข้าสู่ระบบ */}
+      {/* Role selector — dropdown เลือกบทบาทที่จะเข้าสู่ระบบ (1 user = 1 role) */}
       <div>
-        <p className="text-[12px] font-medium text-ink-3 mb-2">เข้าสู่ระบบในฐานะ</p>
-        <div className="grid grid-cols-3 gap-2">
-          {LOGIN_ROLES.map((r) => {
-            const Icon = r.icon;
-            const active = role === r.id;
-            return (
-              <button
-                key={r.id}
-                type="button"
-                onClick={() => setRole(r.id)}
-                className={`flex flex-col items-center gap-1.5 py-3 rounded-r2 border transition-all ${
-                  active
-                    ? "border-viridian bg-viridian-wash text-viridian"
-                    : "border-line text-ink-3 hover:border-ink-4"
-                }`}
-              >
-                <Icon size={18} className={active ? "text-viridian" : "text-ink-4"} />
-                <span className="text-[12px] font-medium">{r.label}</span>
-              </button>
-            );
-          })}
+        <label htmlFor="login-role" className="block text-[12px] font-medium text-ink-3 mb-1.5">
+          เข้าสู่ระบบในฐานะ
+        </label>
+        <div className="relative">
+          <activeRole.icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-viridian pointer-events-none" />
+          <select
+            id="login-role"
+            value={role}
+            onChange={(e) => setRole(e.target.value as LoginRole)}
+            className="w-full appearance-none border border-line rounded-r2 pl-9 pr-9 h-[44px] text-[14px] font-thai bg-paper-3 text-ink focus:outline-none focus:border-viridian transition-colors cursor-pointer"
+          >
+            {LOGIN_ROLES.map((r) => (
+              <option key={r.id} value={r.id}>{r.label}</option>
+            ))}
+          </select>
+          <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-4 pointer-events-none" />
         </div>
         <p className="text-[11px] text-ink-4 mt-2 flex items-center gap-1">
           <ChevronRight size={11} className="text-viridian shrink-0" />
-          หลังเข้าสู่ระบบจะนำคุณไปยัง <strong className="text-ink-3 mx-0.5">{activeRole.dest}</strong> โดยอัตโนมัติ
+          เข้าสู่ระบบแล้วจะไปยัง <strong className="text-ink-3 mx-0.5">{activeRole.dest}</strong>
+          {" "}· 1 บัญชีมีได้ 1 บทบาทเท่านั้น
         </p>
       </div>
 
@@ -626,11 +623,17 @@ function LoginForm({ locale }: { locale: string }) {
       </div>
 
       {method === "email" ? (
-        <EmailLoginForm locale={locale} />
+        <EmailLoginForm locale={locale} role={role} />
       ) : phoneMode === "password" ? (
         <PhonePasswordLoginForm locale={locale} onSwitchToOtp={() => setPhoneMode("otp")} />
       ) : (
         <PhoneLoginForm locale={locale} onSwitchToPassword={() => setPhoneMode("password")} />
+      )}
+
+      {role !== "student" && method === "phone" && (
+        <p className="text-[11px] text-ink-4 -mt-2">
+          หมายเหตุ: การเข้าสู่ระบบด้วยเบอร์โทรรองรับเฉพาะบัญชีนักเรียน
+        </p>
       )}
     </div>
   );
