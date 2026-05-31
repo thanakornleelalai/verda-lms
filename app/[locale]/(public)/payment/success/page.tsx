@@ -6,6 +6,11 @@ import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/primitives/Button";
 import { CourseThumbnail } from "@/components/course/CourseThumbnail";
 import { MOCK_COURSES } from "@/mock";
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { completeOrder } from "@/actions/payment";
+import { getCourseBySlug } from "@/lib/queries/courses";
+import type { Course } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -17,8 +22,45 @@ export default async function PaymentSuccessPage({
   const locale = await getLocale();
   const { courseId, orderId } = await searchParams;
 
-  // Find purchased course from mock (in production: db.order.findUnique)
-  const course = MOCK_COURSES.find((c) => c.id === courseId) ?? MOCK_COURSES[0];
+  const session = await auth();
+
+  // ── Finalize order → create enrollment(s) ──────────────────────────────────
+  // โหมด mock (ไม่มี STRIPE_SECRET_KEY): Stripe webhook ไม่ทำงาน จึง finalize ที่นี่
+  // โหมด Stripe จริง: webhook เป็นตัวหลัก เราย้ำเฉพาะตอน order = PAID แล้ว (กันการ enroll ฟรี)
+  if (orderId && session?.user?.id) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      await completeOrder(orderId);
+    } else {
+      try {
+        const ord = await db.order.findUnique({ where: { id: orderId }, select: { status: true, userId: true } });
+        if (ord?.userId === session.user.id && ord.status === "PAID") {
+          await completeOrder(orderId);
+        }
+      } catch { /* no DB */ }
+    }
+  }
+
+  // ── Resolve purchased course (DB first, mock fallback) ─────────────────────
+  let course: Course | null = null;
+  try {
+    if (courseId) {
+      const dbCourse = await db.course.findUnique({ where: { id: courseId }, select: { slug: true } });
+      if (dbCourse) course = await getCourseBySlug(dbCourse.slug);
+    }
+    if (!course && orderId) {
+      const ord = await db.order.findUnique({ where: { id: orderId }, include: { items: { take: 1 } } });
+      const cid = ord?.items[0]?.courseId;
+      if (cid) {
+        const c = await db.course.findUnique({ where: { id: cid }, select: { slug: true } });
+        if (c) course = await getCourseBySlug(c.slug);
+      }
+    }
+  } catch { /* DB unavailable — use mock */ }
+
+  if (!course) {
+    course = MOCK_COURSES.find((c) => c.id === courseId) ?? MOCK_COURSES[0];
+  }
+
   const firstLessonId = course.sections[0]?.lessons[0]?.id ?? "";
 
   return (

@@ -3,7 +3,6 @@
 import { db } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import { createPromptPaySource, createCharge } from "@/lib/omise";
-import { MOCK_COURSES } from "@/mock";
 import { auth } from "@/lib/auth";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -37,16 +36,6 @@ export interface CheckoutResult {
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
-
-function getCoursePrice(courseId: string): number {
-  const course = MOCK_COURSES.find((c) => c.id === courseId);
-  return course?.price ?? 0;
-}
-
-function getCourseTitle(courseId: string): string {
-  const course = MOCK_COURSES.find((c) => c.id === courseId);
-  return course?.title ?? courseId;
-}
 
 /** หา user ที่ login อยู่ */
 async function getCurrentUser() {
@@ -298,6 +287,8 @@ export async function completeOrder(orderId: string): Promise<void> {
     });
     if (!order || order.status === "PAID") return;
 
+    // Mark PAID + enroll into each purchased course.
+    // NOTE: ไม่ออก certificate ที่นี่ — ใบประกาศต้องได้จากการเรียนจบ/ผ่านแบบทดสอบเท่านั้น
     await db.$transaction([
       db.order.update({ where: { id: orderId }, data: { status: "PAID" } }),
       ...order.items.map((item) =>
@@ -307,13 +298,21 @@ export async function completeOrder(orderId: string): Promise<void> {
           update: {},
         }),
       ),
-      ...order.items.map((item) =>
-        db.certificate.upsert({
-          where: { userId_courseId: { userId: order.userId, courseId: item.courseId } },
-          create: { userId: order.userId, courseId: item.courseId },
-          update: {},
-        }),
-      ),
     ]);
+
+    // Create progress row for each enrollment (so the course shows on dashboard)
+    for (const item of order.items) {
+      const enr = await db.enrollment.findUnique({
+        where: { userId_courseId: { userId: order.userId, courseId: item.courseId } },
+        select: { id: true },
+      });
+      if (enr) {
+        await db.userCourseProgress.upsert({
+          where: { userId_courseId: { userId: order.userId, courseId: item.courseId } },
+          create: { enrollmentId: enr.id, userId: order.userId, courseId: item.courseId, progressPct: 0 },
+          update: {},
+        });
+      }
+    }
   } catch { /* no DB — skip */ }
 }

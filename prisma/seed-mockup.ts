@@ -176,9 +176,10 @@ const ENROLLMENTS: { userId: string; courseId: string; pct: number; lastLesson: 
   { userId: STUDENT, courseId: "crs_001", pct: 100, lastLesson: "les_ux_3_1", completedLessons: ["les_ux_1_1","les_ux_1_2","les_ux_1_3","les_ux_2_1","les_ux_2_2","les_ux_2_3","les_ux_3_1"], cert: true },
   { userId: STUDENT, courseId: "crs_002", pct: 60, lastLesson: "les_ml_2_1", completedLessons: ["les_ml_1_1","les_ml_1_2","les_ml_1_3"] },
   { userId: STUDENT, courseId: "crs_003", pct: 25, lastLesson: "les_next_1_2", completedLessons: ["les_next_1_1"] },
-  // Demo: 1 complete (+cert), 1 mid
+  // Demo: 1 complete (+cert), 1 mid (UX), 1 ML Specialization (in progress)
   { userId: DEMO, courseId: "crs_003", pct: 100, lastLesson: "les_next_2_1", completedLessons: ["les_next_1_1","les_next_1_2","les_next_1_3","les_next_2_1"], cert: true },
   { userId: DEMO, courseId: "crs_001", pct: 45, lastLesson: "les_ux_2_1", completedLessons: ["les_ux_1_1","les_ux_1_2","les_ux_1_3"] },
+  { userId: DEMO, courseId: "crs_002", pct: 40, lastLesson: "les_ml_1_2", completedLessons: ["les_ml_1_1","les_ml_1_2"] },
 ];
 
 async function main() {
