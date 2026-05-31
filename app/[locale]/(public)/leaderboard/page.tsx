@@ -13,7 +13,7 @@ const MOCK_LEADERS = [
   { rank: 3, name: "ธนพล สมใจ", points: 7340, streak: 7, badge: "🥉" },
   { rank: 4, name: "นภา สุขใส", points: 6210, streak: 5, badge: "" },
   { rank: 5, name: "กิตติ วงศ์ดี", points: 5890, streak: 3, badge: "" },
-  { rank: 6, name: "พิมพ์ชนก ใหม่", points: 5340, streak: 2, badge: "" },
+  { rank: 6, name: "พิมพ์พร ใหม่", points: 5340, streak: 2, badge: "" },
   { rank: 7, name: "อรอนงค์ สวยงาม", points: 4980, streak: 1, badge: "" },
   { rank: 8, name: "มานะ ทำดี", points: 4560, streak: 0, badge: "" },
 ];

@@ -57,7 +57,7 @@ export default async function AdminUsersPage({
     users = [
       { id: "dev_admin_001", name: "Admin (Dev)", email: "admin@verda.dev", role: "ADMIN", createdAt: "2025-11-01" },
       { id: "dev_instructor_001", name: "Instructor (Dev)", email: "instructor@verda.dev", role: "INSTRUCTOR", createdAt: "2025-11-01" },
-      { id: "usr_instructor_001", name: "คุณพิมพ์ชนก วัฒนากร", email: "pimchanok@example.com", role: "INSTRUCTOR", createdAt: "2025-11-01" },
+      { id: "usr_instructor_001", name: "คุณพิมพ์พร วัฒนากร", email: "pimchanok@example.com", role: "INSTRUCTOR", createdAt: "2025-11-01" },
       { id: "usr_instructor_002", name: "คุณธนพล สิทธิกุล", email: "thanaphol@example.com", role: "INSTRUCTOR", createdAt: "2025-12-10" },
       { id: "usr_student_001", name: "คุณสมชาย ทดสอบ", email: "demo@verda.dev", role: "STUDENT", createdAt: "2026-01-15" },
       { id: "dev_student_001", name: "Student (Dev)", email: "student@verda.dev", role: "STUDENT", createdAt: "2026-01-15" },

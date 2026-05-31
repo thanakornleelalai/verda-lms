@@ -92,7 +92,7 @@ const questionStore: CourseQuestion[] = [
     userName: "ปกรณ์ ใฝ่รู้",
     question: "คอร์สนี้ต้องมีพื้นฐานการออกแบบมาก่อนไหมครับ?",
     answer: "ไม่จำเป็นเลยค่ะ คอร์สนี้เริ่มจากศูนย์ เหมาะกับมือใหม่มากค่ะ",
-    answeredBy: "คุณพิมพ์ชนก วัฒนากร",
+    answeredBy: "คุณพิมพ์พร วัฒนากร",
     createdAt: new Date("2026-04-10").toISOString(),
   },
 ];

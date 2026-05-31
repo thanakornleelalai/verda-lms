@@ -14,7 +14,7 @@ export const MOCK_INSTRUCTOR: User = {
   id: "usr_instructor_001",
   tenantId: "ten_default",
   email: "pimchanok@example.com",
-  name: "คุณพิมพ์ชนก วัฒนากร",
+  name: "คุณพิมพ์พร วัฒนากร",
   role: "INSTRUCTOR",
   twoFactorEnabled: false,
   createdAt: "2025-11-01T09:00:00Z",
@@ -23,7 +23,7 @@ export const MOCK_INSTRUCTOR: User = {
 export const MOCK_INSTRUCTORS: PublicInstructor[] = [
   {
     id: "usr_instructor_001",
-    name: "คุณพิมพ์ชนก วัฒนากร",
+    name: "คุณพิมพ์พร วัฒนากร",
     bio: "UX Designer & Trainer, 10+ ปี · อดีต UX Lead ที่ SCB Tech",
     courseCount: 4,
     studentCount: 3241,

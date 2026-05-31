@@ -14,7 +14,7 @@ export const MOCK_COURSES: Course[] = [
     level: "BEGINNER",
     language: "th",
     instructorId: "usr_instructor_001",
-    instructor: { id: "usr_instructor_001", name: "คุณพิมพ์ชนก วัฒนากร" },
+    instructor: { id: "usr_instructor_001", name: "คุณพิมพ์พร วัฒนากร" },
     sections: [
       {
         id: "sec_001_1",
@@ -199,7 +199,7 @@ Plugin ที่แนะนำสำหรับ UX Designer
     level: "INTERMEDIATE",
     language: "th",
     instructorId: "usr_instructor_001",
-    instructor: { id: "usr_instructor_001", name: "คุณพิมพ์ชนก วัฒนากร" },
+    instructor: { id: "usr_instructor_001", name: "คุณพิมพ์พร วัฒนากร" },
     sections: [],
     totalDuration: 18000,
     enrollmentCount: 1890,

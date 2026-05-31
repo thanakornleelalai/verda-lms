@@ -200,7 +200,7 @@ function HeroSection() {
             <div className="p-4">
               <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-viridian mb-1">UX DESIGN</p>
               <p className="font-semibold text-[14px] text-ink leading-[1.35]">UX Design & Figma Masterclass</p>
-              <p className="text-[11px] text-ink-3 mt-1">คุณพิมพ์ชนก วัฒนากร</p>
+              <p className="text-[11px] text-ink-3 mt-1">คุณพิมพ์พร วัฒนากร</p>
               <div className="flex items-center gap-1 mt-2">
                 <Star size={11} className="fill-gold text-gold" />
                 <span className="text-[12px] font-medium text-ink">4.9</span>

@@ -212,7 +212,7 @@ export default function BecomeInstructorPage() {
               <div className="flex flex-col gap-5">
                 <div className="grid grid-cols-2 gap-4">
                   <Field label="ชื่อ-นามสกุล *">
-                    <input className="input-base" placeholder="พิมพ์ชนก วัฒนากร" value={form.fullName}
+                    <input className="input-base" placeholder="พิมพ์พร วัฒนากร" value={form.fullName}
                       onChange={(e) => update({ fullName: e.target.value })} />
                   </Field>
                   <Field label="อีเมลติดต่อ *">

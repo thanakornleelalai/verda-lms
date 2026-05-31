@@ -70,7 +70,7 @@ const RULES: Rule[] = [
   },
   {
     keys: /ux|ui|design|ดีไซน์|figma|canva|illustrator|photoshop|prototype|wireframe/i,
-    answer: "คอร์ส UX/UI Design น่าเรียนมากเลยค่ะ 🎨✨\n\nคอร์สยอดนิยมที่หนูแนะนำ:\n• UX Design & Figma Masterclass ⭐\n• UI Design System Workshop\n• Product Design for Developers\n• User Research & Usability Testing\n\n👩‍🏫 สอนโดย: คุณพิมพ์ชนก Lead UX Designer @ SCB ค่ะ\n\n🏫 มีทั้งออนไลน์ และ Workshop On-site ที่ PIM นะคะ~",
+    answer: "คอร์ส UX/UI Design น่าเรียนมากเลยค่ะ 🎨✨\n\nคอร์สยอดนิยมที่หนูแนะนำ:\n• UX Design & Figma Masterclass ⭐\n• UI Design System Workshop\n• Product Design for Developers\n• User Research & Usability Testing\n\n👩‍🏫 สอนโดย: คุณพิมพ์พร Lead UX Designer @ SCB ค่ะ\n\n🏫 มีทั้งออนไลน์ และ Workshop On-site ที่ PIM นะคะ~",
   },
   {
     keys: /machine learning|ml\b|ai\b|ปัญญาประดิษฐ์|deep learning|neural|tensorflow|pytorch|llm|chatgpt|generative/i,
@@ -140,7 +140,7 @@ const RULES: Rule[] = [
   // ── ผู้สอน ────────────────────────────────────────────────────────────────
   {
     keys: /ผู้สอน|อาจารย์|instructor|ครู|สอนโดย|สอนจาก|who.*teach|teacher/i,
-    answer: "ผู้สอนของ VERDA เก่งมากเลยค่ะ 👩‍🏫✨\nเป็นผู้เชี่ยวชาญที่ทำงานจริงทุกคนเลยนะคะ\n\nตัวอย่างผู้สอน:\n👩 คุณพิมพ์ชนก — Lead UX Designer @ SCB\n👨 Andrew Ng — Stanford / Coursera AI\n👨 คุณธนกร — Full Stack @ Agoda\n👨 คุณวิชัย — Data Scientist @ Lazada\n👨 คุณเจษฎา — DevOps @ LINE\n👩 ดร.สุมาลี — อาจารย์ประจำ PIM\n\n🏫 ผู้สอน On-site บาง session เป็นอาจารย์จาก PIM โดยตรงด้วยนะคะ~\n\nดูโปรไฟล์ทั้งหมดที่หน้า ผู้สอน ได้เลยค่ะ 💚",
+    answer: "ผู้สอนของ VERDA เก่งมากเลยค่ะ 👩‍🏫✨\nเป็นผู้เชี่ยวชาญที่ทำงานจริงทุกคนเลยนะคะ\n\nตัวอย่างผู้สอน:\n👩 คุณพิมพ์พร — Lead UX Designer @ SCB\n👨 Andrew Ng — Stanford / Coursera AI\n👨 คุณธนกร — Full Stack @ Agoda\n👨 คุณวิชัย — Data Scientist @ Lazada\n👨 คุณเจษฎา — DevOps @ LINE\n👩 ดร.สุมาลี — อาจารย์ประจำ PIM\n\n🏫 ผู้สอน On-site บาง session เป็นอาจารย์จาก PIM โดยตรงด้วยนะคะ~\n\nดูโปรไฟล์ทั้งหมดที่หน้า ผู้สอน ได้เลยค่ะ 💚",
   },
 
   // ── ชำระเงิน ──────────────────────────────────────────────────────────────

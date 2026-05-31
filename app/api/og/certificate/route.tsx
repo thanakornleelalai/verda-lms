@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
     } else if (certId === "cert_ux_001") {
       studentName = "วีรวัฒน์ ใจดี";
       courseTitle = "UX Design & Figma Masterclass";
-      instructorName = "พิมพ์ชนก วัฒนากร";
+      instructorName = "พิมพ์พร วัฒนากร";
       hours = 8;
     }
   }

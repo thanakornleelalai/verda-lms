@@ -8,7 +8,7 @@ const SYSTEM_PROMPT = `คุณคือ Verdy ผู้ช่วย AI ขอ�
 
 ข้อมูลแพลตฟอร์ม VERDA LMS:
 - คอร์สกว่า 200+ คอร์ส ครอบคลุม UX/UI Design, Machine Learning, Next.js, Data Science, Digital Marketing ฯลฯ
-- ผู้สอนเป็นผู้เชี่ยวชาญที่ทำงานจริง เช่น คุณพิมพ์ชนก (UX Designer), Andrew Ng (ML), คุณธนกร (Full Stack)
+- ผู้สอนเป็นผู้เชี่ยวชาญที่ทำงานจริง เช่น คุณพิมพ์พร (UX Designer), Andrew Ng (ML), คุณธนกร (Full Stack)
 
 แผนราคา:
 - รายเดือน: ฿299/เดือน — เข้าถึงคอร์สทั้งหมด ดาวน์โหลด Offline ใบประกาศดิจิทัล Q&A ไม่จำกัด

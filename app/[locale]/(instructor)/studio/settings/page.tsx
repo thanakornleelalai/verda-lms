@@ -19,7 +19,7 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 
 export default function StudioSettingsPage() {
   const [form, setForm] = useState({
-    name: "คุณพิมพ์ชนก วัฒนากร",
+    name: "คุณพิมพ์พร วัฒนากร",
     bio: "UX Designer & Trainer, 10+ ปี · อดีต UX Lead ที่ SCB Tech",
     image: "",
   });

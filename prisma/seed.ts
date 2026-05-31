@@ -45,7 +45,7 @@ async function main() {
       create: {
         id: "usr_instructor_001",
         email: "instructor@verda.dev",
-        name: "คุณพิมพ์ชนก วัฒนากร",
+        name: "คุณพิมพ์พร วัฒนากร",
         passwordHash: await bcrypt.hash("instructor1234", 12),
         role: "INSTRUCTOR",
         headline: "Lead UX Designer @ SCB",

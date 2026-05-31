@@ -163,7 +163,7 @@ export async function verifyCertificate(certId: string): Promise<VerifyResult> {
       cert_ux_001: {
         studentName: "วีรวัฒน์ ใจดี",
         courseTitle: "UX Design & Figma Masterclass",
-        instructorName: "พิมพ์ชนก วัฒนากร",
+        instructorName: "พิมพ์พร วัฒนากร",
         issuedAt: "2026-03-20T00:00:00Z",
         hours: 8,
       },

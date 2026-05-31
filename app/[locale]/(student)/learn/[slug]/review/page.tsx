@@ -28,7 +28,7 @@ async function getCourseInfo(slug: string): Promise<{ title: string; instructorN
   const MOCK: Record<string, { title: string; instructorName: string }> = {
     "ux-design-figma-masterclass": {
       title: "UX Design & Figma Masterclass",
-      instructorName: "คุณพิมพ์ชนก วัฒนากร",
+      instructorName: "คุณพิมพ์พร วัฒนากร",
     },
     "financial-planning-for-freelancers": {
       title: "Financial Planning for Freelancers",

@@ -1,8 +1,8 @@
 /**
  * Fixup seed — run: npx tsx prisma/seed-fixup.ts (DATABASE_URL + DIRECT_URL required)
  *
- * 1. Delete duplicate "Machine Learning Specialization" (crs_002) by พิมพ์ชนก
- * 2. Rename instructor พิมพ์ชนก วัฒนากร → พิมพ์พร วัฒนากร
+ * 1. Delete duplicate "Machine Learning Specialization" (crs_002) by พิมพ์พร
+ * 2. Rename instructor พิมพ์พร วัฒนากร → พิมพ์พร วัฒนากร
  * 3. Set per-course "outcomes" (สิ่งที่คุณจะได้เรียนรู้) aligned with lessons
  * 4. Add Marketing + Business courses so all 5 teaching categories are covered
  * 5. Re-point student/demo enrollments away from the deleted course
@@ -21,7 +21,7 @@ async function main() {
   const dup = await db.course.findUnique({ where: { id: "crs_002" }, select: { id: true, instructorId: true } });
   if (dup) {
     await db.course.delete({ where: { id: "crs_002" } });
-    console.log("🗑️  Deleted crs_002 (Machine Learning Specialization by พิมพ์ชนก)");
+    console.log("🗑️  Deleted crs_002 (Machine Learning Specialization by พิมพ์พร)");
   } else {
     console.log("ℹ️  crs_002 already removed");
   }

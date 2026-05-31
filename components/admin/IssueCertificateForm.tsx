@@ -8,11 +8,11 @@ import { Button } from "@/components/primitives/Button";
 import { cn } from "@/lib/utils";
 
 const COURSE_OPTIONS = [
-  { title: "UX Design & Figma Masterclass", instructor: "คุณพิมพ์ชนก วัฒนากร" },
+  { title: "UX Design & Figma Masterclass", instructor: "คุณพิมพ์พร วัฒนากร" },
   { title: "Next.js 15 Fullstack Bootcamp", instructor: "คุณธนพล สิทธิกุล" },
   { title: "Python Data Science Bootcamp", instructor: "คุณนันทวัน ชัยวิชิต" },
   { title: "Meta Ads Masterclass 2026", instructor: "คุณภูริช อินทรศักดิ์" },
-  { title: "English for Tech Professionals", instructor: "คุณพิมพ์ชนก วัฒนากร" },
+  { title: "English for Tech Professionals", instructor: "คุณพิมพ์พร วัฒนากร" },
   { title: "Financial Planning for Freelancers", instructor: "คุณธนพล สิทธิกุล" },
   { title: "Machine Learning Specialization", instructor: "Andrew Ng" },
 ];
@@ -156,7 +156,7 @@ export function IssueCertificateForm() {
           </label>
           <input
             type="text"
-            placeholder="เช่น คุณพิมพ์ชนก วัฒนากร"
+            placeholder="เช่น คุณพิมพ์พร วัฒนากร"
             value={instructor}
             onChange={(e) => {
               setInstructor(e.target.value);

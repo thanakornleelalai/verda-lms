@@ -72,7 +72,7 @@ async function getCert(certId: string, sessionName?: string | null): Promise<Cer
     },
     cert_ux_001: {
       courseTitle: "UX Design & Figma Masterclass",
-      instructorName: "พิมพ์ชนก วัฒนากร",
+      instructorName: "พิมพ์พร วัฒนากร",
       issuedAt: new Date("2026-03-20"),
       hours: 8,
       courseSlug: "ux-design-figma-masterclass",
