@@ -6,9 +6,11 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   CheckCircle, ChevronRight, Users, BookOpen, TrendingUp,
   Star, Award, Loader2, AlertCircle, ArrowLeft, ArrowRight,
+  Mail, Lock, User as UserIcon, Eye, EyeOff, UserPlus,
 } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Footer } from "@/components/layout/Footer";
@@ -16,6 +18,7 @@ import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/primitives/Button";
 import { EyebrowLabel } from "@/components/primitives/EyebrowLabel";
 import { applyAsInstructor, type ApplicationFormData } from "@/actions/instructor-application";
+import { registerUser } from "@/actions/auth";
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 
@@ -56,15 +59,56 @@ const EXPERTISE_OPTIONS = [
 export default function BecomeInstructorPage() {
   const locale = useLocale();
   const router = useRouter();
+  const { data: session } = useSession();
   const [isPending, startTransition] = useTransition();
-  const [step, setStep] = useState<"landing" | "form" | "success">("landing");
+  const [step, setStep] = useState<"landing" | "account" | "form" | "success">("landing");
   const [form, setForm] = useState<FormState>(INITIAL);
   const [formStep, setFormStep] = useState(1);
   const [error, setError] = useState("");
 
+  // ── Account creation state (สำหรับผู้ที่ยังไม่มีบัญชี) ──
+  const [acct, setAcct] = useState({ firstName: "", lastName: "", email: "", password: "", confirm: "" });
+  const [showPw, setShowPw] = useState(false);
+  const isLoggedIn = !!session?.user;
+
   function update(patch: Partial<FormState>) {
     setForm((f) => ({ ...f, ...patch }));
     setError("");
+  }
+
+  // เริ่มสมัคร — ถ้ายังไม่ล็อกอินให้เปิดบัญชีก่อน, ถ้าล็อกอินแล้วไปกรอกประวัติเลย
+  function startApplication() {
+    setError("");
+    if (isLoggedIn) {
+      setForm((f) => ({
+        ...f,
+        fullName: session!.user!.name ?? f.fullName,
+        email: session!.user!.email ?? f.email,
+      }));
+      setStep("form");
+    } else {
+      setStep("account");
+    }
+  }
+
+  // เปิดบัญชี (ชื่อ นามสกุล อีเมล รหัสผ่าน) → สมัคร + ล็อกอิน → ไปกรอกประวัติ
+  function handleCreateAccount() {
+    setError("");
+    const firstName = acct.firstName.trim();
+    const lastName = acct.lastName.trim();
+    if (!firstName || !lastName) { setError("กรุณากรอกชื่อและนามสกุล"); return; }
+    if (!acct.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(acct.email)) { setError("กรุณากรอกอีเมลที่ถูกต้อง"); return; }
+    if (acct.password.length < 8) { setError("รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร"); return; }
+    if (acct.password !== acct.confirm) { setError("รหัสผ่านยืนยันไม่ตรงกัน"); return; }
+
+    const fullName = `${firstName} ${lastName}`;
+    startTransition(async () => {
+      const result = await registerUser({ name: fullName, email: acct.email.trim(), password: acct.password });
+      if (result.error) { setError(result.error); return; }
+      // บัญชีถูกสร้าง + ล็อกอินแล้ว (server-side) → prefill แล้วไปกรอกประวัติ
+      setForm((f) => ({ ...f, fullName, email: acct.email.trim() }));
+      setStep("form");
+    });
   }
 
   function validateStep1() {
@@ -158,6 +202,97 @@ export default function BecomeInstructorPage() {
     );
   }
 
+  // ── Account creation screen (เปิดบัญชีก่อนกรอกประวัติผู้สอน) ──────────────────
+  if (step === "account") {
+    return (
+      <div className="min-h-screen bg-paper">
+        <TopBar />
+        <main className="py-12">
+          <Container className="max-w-[520px]">
+            <button
+              onClick={() => { setStep("landing"); setError(""); }}
+              className="flex items-center gap-1.5 text-[13px] text-ink-3 hover:text-ink mb-8 transition-colors"
+            >
+              <ArrowLeft size={14} /> กลับ
+            </button>
+
+            <EyebrowLabel className="mb-2">ขั้นที่ 1 จาก 2 — เปิดบัญชี</EyebrowLabel>
+            <h1 className="font-display text-[30px] text-ink tracking-[-0.015em] mb-2">
+              เปิดบัญชีผู้สอน
+            </h1>
+            <p className="text-[14px] text-ink-3 mb-8 font-thai">
+              สร้างบัญชีก่อน จากนั้นจึงกรอกประวัติเพื่อส่งใบสมัครเป็นผู้สอน
+            </p>
+
+            {error && (
+              <div className="flex items-center gap-2 bg-danger/5 border border-danger/20 text-danger text-[13px] rounded-r2 px-4 py-2.5 mb-5">
+                <AlertCircle size={14} className="shrink-0" /> {error}
+              </div>
+            )}
+
+            <div className="bg-paper-3 border border-line rounded-r4 p-7 flex flex-col gap-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="ชื่อ *">
+                  <div className="relative">
+                    <UserIcon size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-4" />
+                    <input className="input-base pl-9" placeholder="พิมพ์พร" value={acct.firstName}
+                      onChange={(e) => { setAcct((a) => ({ ...a, firstName: e.target.value })); setError(""); }} />
+                  </div>
+                </Field>
+                <Field label="นามสกุล *">
+                  <input className="input-base" placeholder="วัฒนากร" value={acct.lastName}
+                    onChange={(e) => { setAcct((a) => ({ ...a, lastName: e.target.value })); setError(""); }} />
+                </Field>
+              </div>
+              <Field label="อีเมล *">
+                <div className="relative">
+                  <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-4" />
+                  <input type="email" className="input-base pl-9" placeholder="you@example.com" value={acct.email}
+                    onChange={(e) => { setAcct((a) => ({ ...a, email: e.target.value })); setError(""); }} />
+                </div>
+              </Field>
+              <Field label="รหัสผ่าน *" hint="อย่างน้อย 8 ตัวอักษร">
+                <div className="relative">
+                  <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-4" />
+                  <input type={showPw ? "text" : "password"} className="input-base pl-9 pr-10" placeholder="••••••••" value={acct.password}
+                    onChange={(e) => { setAcct((a) => ({ ...a, password: e.target.value })); setError(""); }} />
+                  <button type="button" onClick={() => setShowPw((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-4 hover:text-ink">
+                    {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </Field>
+              <Field label="ยืนยันรหัสผ่าน *">
+                <div className="relative">
+                  <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-4" />
+                  <input type={showPw ? "text" : "password"} className="input-base pl-9" placeholder="••••••••" value={acct.confirm}
+                    onChange={(e) => { setAcct((a) => ({ ...a, confirm: e.target.value })); setError(""); }}
+                    onKeyDown={(e) => e.key === "Enter" && handleCreateAccount()} />
+                </div>
+              </Field>
+
+              <Button variant="primary" size="lg" onClick={handleCreateAccount} disabled={isPending}
+                className="w-full justify-center gap-2 mt-2">
+                {isPending ? (
+                  <><Loader2 size={16} className="animate-spin" /> กำลังเปิดบัญชี…</>
+                ) : (
+                  <><UserPlus size={16} /> เปิดบัญชีและกรอกประวัติต่อ <ArrowRight size={15} /></>
+                )}
+              </Button>
+            </div>
+
+            <p className="text-center text-[13px] text-ink-3 mt-6">
+              มีบัญชีอยู่แล้ว?{" "}
+              <Link href={`/${locale}/login`} className="text-viridian hover:underline">เข้าสู่ระบบ</Link>
+              {" "}แล้วกลับมากดสมัครเป็นผู้สอน
+            </p>
+          </Container>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   // ── Form screen ─────────────────────────────────────────────────────────────
   if (step === "form") {
     const STEP_LABELS = ["ข้อมูลส่วนตัว", "ประสบการณ์", "ไอเดียคอร์ส"];
@@ -174,10 +309,17 @@ export default function BecomeInstructorPage() {
               <ArrowLeft size={14} /> กลับ
             </button>
 
-            <EyebrowLabel className="mb-2">BECOME AN INSTRUCTOR</EyebrowLabel>
-            <h1 className="font-display text-[32px] text-ink tracking-[-0.015em] mb-8">
-              ใบสมัครผู้สอน
+            <EyebrowLabel className="mb-2">
+              {isLoggedIn ? "BECOME AN INSTRUCTOR" : "ขั้นที่ 2 จาก 2 — กรอกประวัติ"}
+            </EyebrowLabel>
+            <h1 className="font-display text-[32px] text-ink tracking-[-0.015em] mb-2">
+              กรอกประวัติผู้สอน
             </h1>
+            {form.email && (
+              <p className="text-[13px] text-ink-3 mb-6 flex items-center gap-1.5">
+                <CheckCircle size={14} className="text-ok" /> บัญชีพร้อมแล้ว: <strong className="text-ink">{form.email}</strong>
+              </p>
+            )}
 
             {/* Step indicator */}
             <div className="flex items-center gap-0 mb-10">
@@ -350,7 +492,7 @@ export default function BecomeInstructorPage() {
             </p>
             <Button
               variant="primary"
-              onClick={() => setStep("form")}
+              onClick={startApplication}
               className="text-[15px] px-7 py-4"
             >
               สมัครเป็นผู้สอน <ChevronRight size={16} className="ml-1" />
@@ -435,7 +577,7 @@ export default function BecomeInstructorPage() {
             </p>
             <Button
               variant="primary"
-              onClick={() => setStep("form")}
+              onClick={startApplication}
               className="text-[15px] px-7 py-4"
             >
               สมัครเป็นผู้สอนเดี๋ยวนี้ →
