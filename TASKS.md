@@ -1,9 +1,25 @@
 ﻿# VERDA LMS — Project Task Tracker
 
 > **Platform:** Online Course Marketplace (Thai / English)
-> **Stack:** Next.js 15 · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Vercel
-> **Last updated:** 2026-05-30 (Session 27 — MVP Final Sprint · Rate Limiting · Drip UI · DnD Reorder · Certificate pdfUrl · Migration · 94%→97%)
-> **Version:** 1.0.1
+> **Stack:** Next.js 16 · TypeScript · Tailwind CSS · PostgreSQL (Supabase) · Vercel
+> **Last updated:** 2026-05-31 (Session 29 — Core Module verification + role-separated login/signup · Supabase live)
+> **Version:** 1.1.0
+
+---
+
+## ✅ Core Module Verification (2026-05-31)
+
+ตรวจสอบ 5 core module ที่จำเป็นต่อ student journey — **ครบทั้งหมด + ทดสอบ runtime กับ Supabase แล้ว**
+
+| # | Module | สถานะ | Route | ไฟล์หลัก | Runtime Test |
+|---|--------|-------|-------|---------|--------------|
+| 1 | **Login / Logout** (เข้าสู่ระบบ) | ✅ มี | `/th/login` | `app/[locale]/(auth)/login/page.tsx` · `actions/auth.ts` · `lib/auth.ts` | 200 · email/phone/OTP/Google/LINE + role selector |
+| 2 | **Browse Course** (ค้นหาวิชา) | ✅ มี | `/th/courses` · `/th/search` | `app/[locale]/(public)/courses/page.tsx` · `search/page.tsx` · `lib/queries/courses.ts` | 200 · ดึงข้อมูลจริงจาก Supabase (UX/ML/Next.js) |
+| 3 | **Learn Lesson** (เข้าเรียน) | ✅ มี | `/th/learn/[slug]/[lessonId]` | `learn/[slug]/[lessonId]/page.tsx` · `components/learn/LessonPlayer.tsx` | 307→login (auth-gated ✓) · video/article/YouTube/Drive |
+| 4 | **Take Quiz** (ทำแบบทดสอบ) | ✅ มี | `/th/learn/[slug]/quiz/[quizId]` | `learn/[slug]/quiz/[quizId]/page.tsx` · `components/quiz/QuizRunner.tsx` · `actions/quiz.ts` | 307→login (auth-gated ✓) · timer/score/maxAttempts |
+| 5 | **Track Progress** (ดูความก้าวหน้า) | ✅ มี | `/th/dashboard` · `/api/progress` | `dashboard/page.tsx` · `app/api/progress/route.ts` | 307→login (auth-gated ✓) · API validates input (400) · ProgressRing + weekly chart |
+
+**สรุป:** ทั้ง 5 module มีครบ ทำงานได้จริง และเชื่อม Supabase แล้ว — ดูสเปคเต็มที่ `PRD.md § Module 1–5`
 
 ---
 

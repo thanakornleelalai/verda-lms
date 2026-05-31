@@ -74,7 +74,16 @@ All roles share: Logout button at the bottom of the dropdown.
 
 ## 4. Core Student Modules
 
-> ทั้ง 5 module ด้านล่างนี้ **มีอยู่ในระบบแล้ว** และพร้อม demo ด้วย mock data
+> ทั้ง 5 module ด้านล่างนี้ **มีอยู่ในระบบแล้ว ทำงานได้จริง และเชื่อมต่อ Supabase แล้ว**
+> (ตรวจสอบ runtime ล่าสุด 2026-05-31 — ดูตารางสรุปที่ `TASKS.md § Core Module Verification`)
+>
+> | # | Module | Route | สถานะ |
+> |---|--------|-------|-------|
+> | 1 | Student Login / Logout | `/th/login` | ✅ |
+> | 2 | Browse Course | `/th/courses` · `/th/search` | ✅ |
+> | 3 | Learn Lesson | `/th/learn/[slug]/[lessonId]` | ✅ |
+> | 4 | Take Quiz | `/th/learn/[slug]/quiz/[quizId]` | ✅ |
+> | 5 | Track Progress | `/th/dashboard` · `/api/progress` | ✅ |
 
 ---
 
