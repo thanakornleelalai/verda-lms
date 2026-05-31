@@ -1,10 +1,9 @@
 /**
- * Seed: 1 demo instructor-application account.
+ * Seed: 1 demo instructor account (APPROVED → role INSTRUCTOR).
  * Run: npx tsx prisma/seed-demo-instructor.ts (DATABASE_URL + DIRECT_URL required)
  *
- * Creates an account that has filled & submitted the instructor application
- * (status PENDING) — ready to demo the full flow: login → see "รอแอดมินตรวจ",
- * and admin → /admin/instructors → approve → role becomes INSTRUCTOR.
+ * Account has a filled instructor application that is APPROVED, so the user's
+ * role is INSTRUCTOR and login routes to /studio (Instructor Studio).
  */
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -25,27 +24,36 @@ async function main() {
     await db.user.delete({ where: { id: prev.id } });
   }
 
-  // 1. Account (created via signup — role STUDENT until approved)
+  const HEADLINE = "Senior Frontend Engineer @ Tech Startup";
+  const BIO = "นักพัฒนา Frontend ประสบการณ์ 7 ปี เชี่ยวชาญ React, Next.js และ TypeScript เคยเป็น tech lead ทีม 8 คน และชอบถ่ายทอดความรู้ผ่านการสอนและเขียนบทความ";
+
+  // 1. Account — role INSTRUCTOR (approved) with profile filled
   const user = await db.user.create({
     data: {
       email: EMAIL,
       name: FULL_NAME,
       passwordHash: await bcrypt.hash(PASSWORD, 12),
-      role: "STUDENT",
+      role: "INSTRUCTOR",
+      headline: HEADLINE,
+      bio: BIO,
+      website: "https://teacherdemo.dev",
       emailVerified: new Date(),
     },
   });
 
-  // 2. Submitted instructor application (PENDING)
+  // 2. Instructor application — APPROVED
   await db.instructorApplication.create({
     data: {
       userId: user.id,
-      status: "PENDING",
+      status: "APPROVED",
+      reviewedBy: "usr_admin_001",
+      reviewedAt: new Date(),
+      reviewNote: "อนุมัติ — โปรไฟล์และไอเดียคอร์สครบถ้วน",
       fullName: FULL_NAME,
       email: EMAIL,
-      headline: "Senior Frontend Engineer @ Tech Startup",
+      headline: HEADLINE,
       expertise: "Web Development",
-      bio: "นักพัฒนา Frontend ประสบการณ์ 7 ปี เชี่ยวชาญ React, Next.js และ TypeScript เคยเป็น tech lead ทีม 8 คน และชอบถ่ายทอดความรู้ผ่านการสอนและเขียนบทความ",
+      bio: BIO,
       experience: "7 ปีในสายงาน Frontend Development · สร้างระบบ e-commerce ที่มีผู้ใช้ 1M+ · พูดใน meetup หลายงาน",
       courseIdea: "คอร์ส 'React + Next.js สำหรับมือใหม่จนถึงระดับกลาง' — ครอบคลุม Hooks, App Router, Server Components, State Management และการ deploy จริง พร้อม workshop ทำโปรเจกต์",
       linkedIn: "https://linkedin.com/in/teacher-demo",
@@ -53,12 +61,11 @@ async function main() {
     },
   });
 
-  console.log("✅ Demo instructor-application account created\n");
+  console.log("✅ Demo INSTRUCTOR account created (role=INSTRUCTOR, application APPROVED)\n");
   console.log("🔑 Login:");
   console.log(`   Email:    ${EMAIL}`);
   console.log(`   Password: ${PASSWORD}`);
-  console.log("\n📋 Application status: PENDING (รอแอดมินตรวจสอบ)");
-  console.log("   → Admin อนุมัติได้ที่ /th/admin/instructors → role เปลี่ยนเป็น INSTRUCTOR");
+  console.log("\n➡️  Login → /redirect → /studio (Instructor Studio)");
 }
 
 main().then(() => process.exit(0)).catch((e) => { console.error("❌", e); process.exit(1); });
