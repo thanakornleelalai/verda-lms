@@ -6,7 +6,7 @@ import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, ChevronDown, ChevronUp, Phone, Mail, Loader2, ArrowLeft, GraduationCap, ShieldCheck, BookOpen, ChevronRight, Sparkles } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { registerUser, sendOTP, verifyOTP, registerWithPhone, sendLoginOTP, loginWithPhone, loginWithPhonePassword, loginWithRole } from "@/actions/auth";
+import { registerUser, sendOTP, verifyOTP, registerWithPhone, sendLoginOTP, loginWithPhone, loginWithPhonePassword, validateRoleLogin } from "@/actions/auth";
 import { Button } from "@/components/primitives/Button";
 
 type Mode = "login" | "student" | "instructor";
@@ -240,10 +240,16 @@ function EmailLoginForm({ locale, role }: { locale: string; role: "student" | "i
     e.preventDefault();
     setError("");
     startTransition(async () => {
-      // Enforce 1 user = 1 role: account's role must match the selected portal
-      const result = await loginWithRole({ email, password, role });
-      if (result.error) {
-        setError(result.error);
+      // 1) Validate role match server-side (1 user = 1 role)
+      const check = await validateRoleLogin({ email, password, role });
+      if (check.error) {
+        setError(check.error);
+        return;
+      }
+      // 2) Sign in CLIENT-side so SessionProvider updates immediately (no false logout)
+      const result = await signIn("credentials", { email, password, redirect: false });
+      if (result?.error) {
+        setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
       } else {
         router.push(`/${locale}/redirect`);
         router.refresh();

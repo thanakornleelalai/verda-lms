@@ -245,10 +245,14 @@ function rolesFor(selected: "student" | "instructor" | "admin"): string[] {
 }
 
 /**
- * Login that enforces the selected role matches the account's single role.
- * A user has exactly one role — if it doesn't match the chosen portal, reject.
+ * Validate credentials + selected role WITHOUT signing in.
+ * The actual sign-in is done client-side (next-auth/react signIn) so the client
+ * SessionProvider updates immediately — otherwise useSession() stays
+ * "unauthenticated" and the UI appears logged out after a server-action login.
+ *
+ * Enforces 1 user = 1 role: account's single role must match the chosen portal.
  */
-export async function loginWithRole(formData: {
+export async function validateRoleLogin(formData: {
   email: string;
   password: string;
   role: "student" | "instructor" | "admin";
@@ -281,17 +285,12 @@ export async function loginWithRole(formData: {
         };
       }
     }
-    // user not found in DB → fall through to signIn (handles dev-bypass accounts)
+    // user not found in DB → allow (dev-bypass accounts validated by signIn)
   } catch {
-    // DB unavailable → skip pre-check, rely on signIn
+    // DB unavailable → skip pre-check, rely on client signIn
   }
 
-  try {
-    await signIn("credentials", { email, password, redirect: false });
-    return {};
-  } catch {
-    return { error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" };
-  }
+  return {}; // validation passed — client performs the actual signIn
 }
 
 // ── Password Reset ─────────────────────────────────────────────────────────────
