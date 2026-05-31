@@ -30,7 +30,7 @@ export default async function InstructorsPage({
   try {
     const { db } = await import("@/lib/db");
     const dbInstructors = await db.user.findMany({
-      where: { role: "INSTRUCTOR" },
+      where: { role: "INSTRUCTOR", suspended: false },
       select: {
         id: true,
         name: true,

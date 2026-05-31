@@ -208,6 +208,7 @@ export async function getInstructorPublicProfile(slug: string) {
       where: {
         OR: [{ id: slug }, { name: { equals: slug, mode: "insensitive" } }],
         role: { in: ["INSTRUCTOR", "ADMIN"] },
+        suspended: false, // suspended instructors are not publicly visible
       },
       select: {
         id: true,
