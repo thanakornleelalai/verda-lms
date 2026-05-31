@@ -73,10 +73,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           const user = await db.user.findUnique({
             where: { email: credentials.email as string },
-            select: { id: true, name: true, email: true, image: true, role: true, passwordHash: true },
+            select: { id: true, name: true, email: true, image: true, role: true, passwordHash: true, suspended: true },
           });
 
           if (!user || !user.passwordHash) return null;
+          if (user.suspended) return null; // suspended accounts cannot log in
 
           const valid = await bcrypt.compare(
             credentials.password as string,

@@ -2,10 +2,10 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { SlidersHorizontal, CheckCircle, XCircle, Clock } from "lucide-react";
+import { SlidersHorizontal, CheckCircle, XCircle, Clock, Ban, RotateCcw } from "lucide-react";
 import { CourseThumbnail } from "@/components/course/CourseThumbnail";
 import { formatNumber, formatPrice } from "@/lib/utils";
-import { approveCourse, rejectCourse } from "@/actions/admin";
+import { approveCourse, rejectCourse, setCourseSuspended } from "@/actions/admin";
 
 export type CourseRow = {
   id: string;
@@ -76,6 +76,19 @@ export function CourseListClient({
           prev.map((c) => (c.id === id ? { ...c, status: "DRAFT" } : c))
         );
         notify("ok", `ส่งคืน "${title}" ให้ผู้สอนแก้ไขแล้ว`);
+      } else {
+        notify("err", res.error ?? "เกิดข้อผิดพลาด");
+      }
+    });
+  }
+
+  function handleSuspend(id: string, title: string, suspend: boolean) {
+    if (suspend && !confirm(`ระงับการแสดงคอร์ส "${title}"?\n\nคอร์สจะถูกซ่อนจากหน้าเว็บไซต์สาธารณะ`)) return;
+    startTransition(async () => {
+      const res = await setCourseSuspended(id, suspend);
+      if (res.success) {
+        setCourses((prev) => prev.map((c) => (c.id === id ? { ...c, status: suspend ? "ARCHIVED" : "PUBLISHED" } : c)));
+        notify("ok", suspend ? `ระงับการแสดง "${title}" แล้ว` : `เปิดแสดง "${title}" อีกครั้งแล้ว`);
       } else {
         notify("err", res.error ?? "เกิดข้อผิดพลาด");
       }
@@ -184,6 +197,30 @@ export function CourseListClient({
                       <CheckCircle size={13} /> อนุมัติ
                     </button>
                   </>
+                )}
+
+                {/* Suspend — for PUBLISHED courses (ระงับการแสดงคอร์ส) */}
+                {course.status === "PUBLISHED" && (
+                  <button
+                    onClick={() => handleSuspend(course.id, course.title, true)}
+                    disabled={isPending}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-r2 text-[12px] border border-line text-ink-3 hover:border-danger hover:text-danger transition-colors disabled:opacity-40"
+                    title="ระงับการแสดงคอร์สจากหน้าเว็บไซต์"
+                  >
+                    <Ban size={13} /> ระงับ
+                  </button>
+                )}
+
+                {/* Restore — for ARCHIVED (suspended) courses */}
+                {course.status === "ARCHIVED" && (
+                  <button
+                    onClick={() => handleSuspend(course.id, course.title, false)}
+                    disabled={isPending}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-r2 text-[12px] border border-ok/30 text-ok hover:bg-ok/10 transition-colors disabled:opacity-40"
+                    title="เปิดแสดงคอร์สอีกครั้ง"
+                  >
+                    <RotateCcw size={13} /> เปิดแสดง
+                  </button>
                 )}
 
                 <Link

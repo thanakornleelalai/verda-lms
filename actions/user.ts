@@ -1,6 +1,7 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 
@@ -169,7 +170,51 @@ export async function adminUpdateUserRole(
   }
 }
 
-// ── Admin: Suspend User ────────────────────────────────────────────────────────
+// ── Admin: Suspend / Restore User ───────────────────────────────────────────────
+
+/**
+ * Suspend or restore a user. Suspended users cannot log in, and their content
+ * (courses, etc.) is hidden across the site.
+ */
+export async function adminSetUserSuspended(
+  targetUserId: string,
+  suspended: boolean,
+): Promise<ActionResult> {
+  const adminId = await requireUserId();
+  if (!adminId) return { success: false, error: "Unauthorized" };
+
+  try {
+    const admin = await db.user.findUnique({ where: { id: adminId }, select: { role: true } });
+    if (!admin || !["ADMIN", "SUPERADMIN"].includes(admin.role)) {
+      return { success: false, error: "ไม่มีสิทธิ์ดำเนินการ" };
+    }
+    if (targetUserId === adminId) return { success: false, error: "ไม่สามารถระงับบัญชีตนเองได้" };
+
+    const target = await db.user.findUnique({ where: { id: targetUserId }, select: { role: true } });
+    if (target && ["ADMIN", "SUPERADMIN"].includes(target.role)) {
+      return { success: false, error: "ไม่สามารถระงับบัญชีผู้ดูแลระบบได้" };
+    }
+
+    await db.user.update({ where: { id: targetUserId }, data: { suspended } });
+
+    // When suspending an instructor, hide their published courses (→ ARCHIVED)
+    if (suspended) {
+      await db.course.updateMany({
+        where: { instructorId: targetUserId, status: "PUBLISHED" },
+        data: { status: "ARCHIVED" },
+      });
+    }
+
+    revalidatePath("/admin/users");
+    revalidatePath("/admin/courses");
+    revalidatePath("/courses");
+    return { success: true };
+  } catch {
+    return { success: false, error: "ไม่สามารถอัปเดตสถานะผู้ใช้ได้" };
+  }
+}
+
+// ── Admin: Delete User ───────────────────────────────────────────────────────
 
 export async function adminDeleteUser(targetUserId: string): Promise<ActionResult> {
   const adminId = await requireUserId();

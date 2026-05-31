@@ -18,7 +18,8 @@ type CoursesFilter = {
 
 function buildWhere(filter?: CoursesFilter, instructorOnly = false) {
   return {
-    ...(instructorOnly ? {} : { status: "PUBLISHED" as const }),
+    // Public catalog: only published courses whose instructor is not suspended
+    ...(instructorOnly ? {} : { status: "PUBLISHED" as const, instructor: { suspended: false } }),
     ...(filter?.query
       ? {
           OR: [

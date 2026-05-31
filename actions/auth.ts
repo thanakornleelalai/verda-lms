@@ -264,9 +264,12 @@ export async function loginWithRole(formData: {
   try {
     const user = await db.user.findUnique({
       where: { email },
-      select: { role: true, passwordHash: true },
+      select: { role: true, passwordHash: true, suspended: true },
     });
     if (user) {
+      if (user.suspended) {
+        return { error: "บัญชีนี้ถูกระงับการใช้งานโดยผู้ดูแลระบบ — กรุณาติดต่อทีมงาน" };
+      }
       if (!user.passwordHash) {
         return { error: "บัญชีนี้ใช้การเข้าสู่ระบบด้วย Google/LINE" };
       }

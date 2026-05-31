@@ -228,6 +228,26 @@ export async function approveCourse(courseId: string): Promise<ActionResult> {
   }
 }
 
+/**
+ * Suspend (hide) a published course or restore it.
+ * Suspend → ARCHIVED (removed from public catalog); Restore → PUBLISHED.
+ */
+export async function setCourseSuspended(courseId: string, suspended: boolean): Promise<ActionResult> {
+  if (!await requireAdmin()) return { success: false, error: "Unauthorized" };
+  const status = suspended ? "ARCHIVED" : "PUBLISHED";
+  try {
+    await db.course.update({ where: { id: courseId }, data: { status } });
+    revalidatePath("/admin/courses");
+    revalidatePath("/courses");
+    return { success: true };
+  } catch {
+    devUpdateCourseStatus(courseId, status);
+    revalidatePath("/admin/courses");
+    revalidatePath("/courses");
+    return { success: true };
+  }
+}
+
 export async function rejectCourse(courseId: string): Promise<ActionResult> {
   if (!await requireAdmin()) return { success: false, error: "Unauthorized" };
   try {

@@ -82,6 +82,7 @@ model User {
   phoneVerified DateTime?
   image         String?
   role          UserRole  @default(STUDENT)
+  suspended     Boolean   @default(false) // admin can suspend → blocks login + hides content
   passwordHash  String?
   bio           String?
   headline      String?

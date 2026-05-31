@@ -2,24 +2,9 @@ import { db } from "@/lib/db";
 import { EyebrowLabel } from "@/components/primitives/EyebrowLabel";
 import { formatNumber } from "@/lib/utils";
 import { UserCheck, Search } from "lucide-react";
+import { UserListClient, type UserRow } from "./UserListClient";
 
 export const dynamic = "force-dynamic";
-
-type UserRow = {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  createdAt: string;
-  _count?: { enrollments: number };
-};
-
-const ROLE_COLORS: Record<string, string> = {
-  STUDENT: "bg-line text-ink-2",
-  INSTRUCTOR: "bg-viridian/10 text-viridian",
-  ADMIN: "bg-amber-400/10 text-amber-600",
-  SUPERADMIN: "bg-danger/10 text-danger",
-};
 
 export default async function AdminUsersPage({
   searchParams,
@@ -40,6 +25,7 @@ export default async function AdminUsersPage({
         name: true,
         email: true,
         role: true,
+        suspended: true,
         createdAt: true,
         _count: { select: { enrollments: true } },
       },
@@ -50,6 +36,7 @@ export default async function AdminUsersPage({
       name: u.name ?? "—",
       email: u.email ?? "—",
       role: u.role,
+      suspended: u.suspended,
       createdAt: u.createdAt.toISOString().slice(0, 10),
       _count: u._count,
     }));
@@ -143,50 +130,7 @@ export default async function AdminUsersPage({
             รายชื่อผู้ใช้ ({filtered.length} รายการที่แสดง)
           </p>
         </div>
-        {filtered.length === 0 ? (
-          <div className="py-12 text-center text-ink-3 text-[14px]">ไม่พบผู้ใช้ที่ตรงกัน</div>
-        ) : (
-          <table className="w-full text-[14px]">
-            <thead>
-              <tr className="border-b border-line">
-                <th className="text-left px-5 py-3 font-mono text-[10px] tracking-[0.1em] uppercase text-ink-3">
-                  ผู้ใช้
-                </th>
-                <th className="text-center px-5 py-3 font-mono text-[10px] tracking-[0.1em] uppercase text-ink-3">
-                  บทบาท
-                </th>
-                <th className="text-right px-5 py-3 font-mono text-[10px] tracking-[0.1em] uppercase text-ink-3">
-                  วันที่สมัคร
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((u) => (
-                <tr
-                  key={u.id}
-                  className="border-b border-line last:border-0 hover:bg-paper-2 transition-colors"
-                >
-                  <td className="px-5 py-3">
-                    <p className="font-medium text-ink">{u.name}</p>
-                    <p className="text-[12px] text-ink-3">{u.email}</p>
-                  </td>
-                  <td className="px-5 py-3 text-center">
-                    <span
-                      className={`font-mono text-[10px] px-2 py-0.5 rounded-pill uppercase tracking-wide ${
-                        ROLE_COLORS[u.role] ?? "bg-line text-ink-3"
-                      }`}
-                    >
-                      {u.role}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-right font-mono text-[12px] text-ink-3">
-                    {u.createdAt}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <UserListClient users={filtered} />
       </div>
     </div>
   );
