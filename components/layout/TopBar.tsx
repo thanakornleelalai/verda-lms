@@ -201,6 +201,12 @@ export function TopBar() {
           <Link href={`/${locale}/pricing`} className="hover:text-viridian transition-colors">
             {t("nav.pricing")}
           </Link>
+          <Link
+            href={`/${locale}/become-instructor`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-pill border border-viridian/40 text-viridian hover:bg-viridian hover:text-white transition-all text-[13px] font-medium"
+          >
+            {t("nav.becomeInstructor")}
+          </Link>
         </nav>
 
         {/* Search form */}
@@ -393,17 +399,21 @@ export function TopBar() {
       </Container>
 
       {/* Mobile nav — visible on small screens only */}
-      <div className="md:hidden border-t border-line bg-paper px-4 py-2 flex items-center justify-around text-[12px] text-ink-3">
+      <div className="md:hidden border-t border-line bg-paper px-2 py-2 flex items-center justify-around text-[11px] text-ink-3">
         <Link href={`/${locale}/courses`} className="flex flex-col items-center gap-0.5 hover:text-viridian transition-colors">
-          <Search size={17} />
+          <Search size={16} />
           <span>{t("nav.browse")}</span>
         </Link>
-        <Link href={`/${locale}/forum`} className="flex flex-col items-center gap-0.5 hover:text-viridian transition-colors font-medium text-viridian">
-          <MessageSquare size={17} />
+        <Link href={`/${locale}/forum`} className="flex flex-col items-center gap-0.5 hover:text-viridian transition-colors">
+          <MessageSquare size={16} />
           <span>{t("nav.webboard")}</span>
         </Link>
+        <Link href={`/${locale}/become-instructor`} className="flex flex-col items-center gap-0.5 text-viridian font-medium">
+          <span className="text-[15px] leading-none">🎓</span>
+          <span>สอน</span>
+        </Link>
         <Link href={`/${locale}/pricing`} className="flex flex-col items-center gap-0.5 hover:text-viridian transition-colors">
-          <span className="text-[16px] leading-none">฿</span>
+          <span className="text-[15px] leading-none">฿</span>
           <span>{t("nav.pricing")}</span>
         </Link>
       </div>

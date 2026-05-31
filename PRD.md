@@ -1,9 +1,9 @@
 # VERDA LMS — Product Requirements Document (PRD)
 
 > **Platform:** Online Course Marketplace (Thai / English Bilingual)
-> **Version:** 1.0.1
-> **Last updated:** 2026-05-30 (Session 27 — MVP Final Sprint: rate limiting, drip UI, DnD lesson reorder, cert pdfUrl, prisma migration, 97% MVP complete)
-> **Status:** MVP Complete — production-ready pending DB connection
+> **Version:** 1.1.0
+> **Last updated:** 2026-05-31 (Session 28 — Instructor Signup Flow: become-instructor page, application form, admin review panel)
+> **Status:** Production Live — Supabase connected, Vercel deployed
 
 ---
 
@@ -766,6 +766,57 @@ Flag components: <FlagTH /> และ <FlagGB /> เป็น inline SVG ไม�
 | `actions/reviews.ts` · `components/course/CourseReviews.tsx` | reviews + Q&A |
 | `lib/cart.tsx` · `components/course/AddToCartButton.tsx` | cart |
 | `app/[locale]/(public)/cart/page.tsx` | cart/checkout (wired to real cart) |
+
+---
+
+## Feature 15 — Instructor Signup Flow
+
+**สถานะ:** ✅ Implemented (2026-05-31)
+
+### Problem Statement
+ต้องการแยก flow การสมัครสำหรับผู้สอน (INSTRUCTOR) ออกจากการสมัครนักเรียน (STUDENT) เพื่อให้มีกระบวนการคัดเลือกคุณภาพและ onboarding ที่ชัดเจน
+
+### 15.1 — Landing Page `/become-instructor`
+- [x] **AC-15.1.1** — Hero section พร้อม stats (ผู้เรียน, จำนวนคอร์ส, รายได้, คะแนน)
+- [x] **AC-15.1.2** — Benefits grid: รายได้ passive, personal brand, เครื่องมือสร้างคอร์ส, analytics
+- [x] **AC-15.1.3** — Who qualifies: เกณฑ์คัดเลือก 5 ข้อ
+- [x] **AC-15.1.4** — CTA button ส่งไปหน้าฟอร์ม
+
+### 15.2 — Application Form (3 Steps)
+- [x] **AC-15.2.1** — Step 1: ข้อมูลส่วนตัว (ชื่อ, อีเมล, headline, expertise, LinkedIn/website)
+- [x] **AC-15.2.2** — Step 2: ประสบการณ์ (bio ≥50 ตัว, experience)
+- [x] **AC-15.2.3** — Step 3: ไอเดียคอร์ส ≥30 ตัว + ยอมรับ T&C
+- [x] **AC-15.2.4** — Validation ทุก field พร้อม error inline
+- [x] **AC-15.2.5** — รองรับทั้งผู้ใช้ที่ login แล้ว และ guest (สร้าง account ให้อัตโนมัติ)
+- [x] **AC-15.2.6** — Success screen แสดงชื่อ + อีเมลที่จะแจ้งผล
+
+### 15.3 — Admin Review Panel `/admin/instructors`
+- [x] **AC-15.3.1** — รายการใบสมัครแบ่งตาม status (PENDING / APPROVED / REJECTED)
+- [x] **AC-15.3.2** — Card expand ดูรายละเอียดครบ (bio, experience, course idea, links)
+- [x] **AC-15.3.3** — ปุ่ม "อนุมัติ" → เปลี่ยน role เป็น INSTRUCTOR + เปิด Studio ทันที
+- [x] **AC-15.3.4** — ปุ่ม "ไม่อนุมัติ" พร้อมช่องกรอก review note (บังคับ)
+- [x] **AC-15.3.5** — Badge จำนวน PENDING ใน sidebar
+
+### 15.4 — Navigation & Discovery
+- [x] **AC-15.4.1** — TopBar desktop: ลิงก์ pill "สมัครเป็นผู้สอน" (viridian outline → solid on hover)
+- [x] **AC-15.4.2** — TopBar mobile: icon 🎓 "สอน" ใน bottom nav bar
+- [x] **AC-15.4.3** — Admin sidebar: "Instructors" entry พร้อม GraduationCap icon
+
+### 15.5 — Database
+- [x] **AC-15.5.1** — `InstructorApplication` model (29 fields + userId unique)
+- [x] **AC-15.5.2** — `ApplicationStatus` enum (PENDING, APPROVED, REJECTED)
+- [x] **AC-15.5.3** — Migration `20260530195700_add_instructor_application` applied to Supabase
+- [x] **AC-15.5.4** — Approve: `db.$transaction` อัปเดต application + user.role ในครั้งเดียว
+
+### Files
+| File | Purpose |
+|------|---------|
+| `app/[locale]/(public)/become-instructor/page.tsx` | Landing + 3-step form + success screen |
+| `actions/instructor-application.ts` | applyAsInstructor, getApplications, approve, reject |
+| `app/[locale]/(admin)/admin/instructors/page.tsx` | Admin review panel |
+| `components/layout/AdminSidebar.tsx` | เพิ่ม Instructors entry |
+| `components/layout/TopBar.tsx` | เพิ่มลิงก์ become-instructor (desktop + mobile) |
+| `prisma/migrations/20260530195700_add_instructor_application/` | DB migration |
 
 ---
 

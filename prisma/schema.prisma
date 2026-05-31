@@ -103,6 +103,7 @@ model User {
   badges        UserBadge[]
   streaks       StreakRecord[]
   courses       Course[]         @relation("InstructorCourses")
+  instructorApplication InstructorApplication?
   tenantId      String?
   tenant        Tenant?          @relation(fields: [tenantId], references: [id])
 }
@@ -460,6 +461,41 @@ model ProgressEvent {
   position  Int?     // seconds
   meta      Json?
   createdAt DateTime @default(now())
+}
+
+// ── Instructor Application ────────────────────────────────────────────────────
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model InstructorApplication {
+  id          String            @id @default(cuid())
+  userId      String            @unique
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      ApplicationStatus @default(PENDING)
+
+  // Applicant profile
+  fullName    String
+  email       String
+  headline    String            // e.g. "Lead UX Designer @ SCB"
+  expertise   String            // main subject area
+  bio         String            @db.Text
+  experience  String            // years / background
+  courseIdea  String            @db.Text // proposed first course
+  linkedIn    String?
+  website     String?
+  portfolio   String?
+
+  // Admin review
+  reviewNote  String?           @db.Text
+  reviewedBy  String?
+  reviewedAt  DateTime?
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 }
 
 // ── Multi-tenant ──────────────────────────────────────────────────────────────
