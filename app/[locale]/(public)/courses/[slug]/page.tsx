@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getCourses } from "@/lib/queries/courses";
 import { TopBar } from "@/components/layout/TopBar";
 import { Footer } from "@/components/layout/Footer";
 import { Container } from "@/components/layout/Container";
@@ -126,7 +127,18 @@ export default async function CourseDetailPage({
   if (!course) notFound();
 
   const firstLessonId = course.sections[0]?.lessons[0]?.id ?? "";
-  const related = MOCK_COURSES.filter((c) => c.id !== course!.id).slice(0, 4);
+
+  // Related courses — from live DB (fallback to mock when DB unavailable)
+  let related: Course[] = [];
+  try {
+    const { courses } = await getCourses({ pageSize: 8 });
+    related = courses.filter((c) => c.id !== course!.id).slice(0, 4);
+  } catch {
+    related = [];
+  }
+  if (related.length === 0) {
+    related = MOCK_COURSES.filter((c) => c.id !== course!.id).slice(0, 4);
+  }
   const t = await getTranslations({ locale, namespace: "course" });
   const totalLessons = course.sections.reduce((s, sec) => s + sec.lessons.length, 0);
   const isFree = course.price === 0;
